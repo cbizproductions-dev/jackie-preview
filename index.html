@@ -270,7 +270,7 @@ section{position:relative;padding-block:clamp(72px,10vw,128px)}
 .phone{font:700 1.5rem/1 var(--display);user-select:all}
 .toast{font:500 .8rem/1 var(--mono);color:var(--jade);min-height:1em}
 
-footer{border-top:1px solid var(--line);padding-block:56px calc(110px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.9rem}
+footer{border-top:1px solid var(--line);padding-block:56px calc(56px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.9rem}
 footer .wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:40px}
 @media (max-width:760px){footer .wrap{grid-template-columns:1fr}}
 footer .refs{font:400 .74rem/1.6 var(--mono);color:var(--faint)}
@@ -302,14 +302,6 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
     <a class="btn btn-gold" href="#book">Book<span>&nbsp;a visit</span></a>
   </div>
 </nav>
-
-<div class="namer" role="group" aria-label="Preview business name">
-  <span>Name preview</span>
-  <button type="button" data-name="glow" aria-pressed="true">Eastern Glow</button>
-  <button type="button" data-name="wave" aria-pressed="false">Still Wave</button>
-  <button type="button" data-name="petal" aria-pressed="false">Quiet Petal</button>
-  <button type="button" data-name="domain" aria-pressed="false">HolisticMedicine.com</button>
-</div>
 
 <header class="hero" id="top">
   <canvas id="qi" aria-hidden="true"></canvas>
@@ -652,7 +644,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 
 /* Name preview */
 const NAMES={glow:{n:"The Eastern Glow",h:'Let your body remember how to <em>glow.</em>'},wave:{n:"The Still Wave",h:'Find the calm beneath <em>the wave.</em>'},petal:{n:"Quiet Petal",h:'Unfold, one <em>quiet breath</em> at a time.'},domain:{n:"HolisticMedicine.com",h:'Holistic medicine, <em>brought to your door.</em>'}};
-function setName(k){const d=NAMES[k];if(!d)return;$$('[data-brand]').forEach(e=>e.textContent=d.n);$('#heroLine').innerHTML=d.h;document.title=d.n;$$('.namer button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.name===k));try{localStorage.setItem('brand',k)}catch(e){};renderSum()}
+function setName(k){const d=NAMES[k];if(!d)return;$$('[data-brand]').forEach(e=>e.textContent=d.n);$('#heroLine').innerHTML=d.h;document.title=d.n;$$('.namer button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.name===k));renderSum()}
 $$('.namer button').forEach(b=>b.onclick=()=>setName(b.dataset.name));
 
 /* Qi flow canvas */
@@ -704,8 +696,7 @@ function renderSum(){const brand=document.title,nm=$('#bkName').value.trim();$('
 $('#bk').addEventListener('submit',e=>e.preventDefault());
 $('#copy').onclick=()=>{const txt=$('#sum').innerText;const ok=()=>{$('#toast').textContent='Copied. Paste it into a text to Jackie.'};const fb=()=>{const r=document.createRange();r.selectNodeContents($('#sum'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#toast').textContent='Selected. Copy it with your keyboard or long-press.'};try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}};
 
-let saved='glow';try{saved=localStorage.getItem('brand')||'glow'}catch(e){}
-setName(saved);
+renderSum();
 })();
 </script>
 
