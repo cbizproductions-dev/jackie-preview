@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>The Eastern Glow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Mobile acupuncture, massage therapy and Traditional Chinese Medicine on Long Island, NY.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: night-sky meridian — dark indigo ground, honey-gold light, three-treasure orbs as the recurring motif; asymmetric editorial grid */
+:root{
+  --ink:#0a1024; --deep:#111a36; --panel:#16203f; --line:rgba(227,184,102,.18);
+  --gold:#e6b965; --gold-hi:#f6d99a; --jade:#8fd0b4; --mist:#a9d4e6;
+  --text:#eef0f6; --muted:#a6aec6; --faint:#6f7896;
+  --display:"Shippori Mincho B1","Songti SC","Noto Serif JP",Georgia,serif;
+  --body:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  --r:22px; --gut:max(16px,env(safe-area-inset-left,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--text);font:400 17px/1.65 var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.08;text-wrap:balance;margin:0}
+h2{font-size:clamp(2rem,4.6vw,3.5rem);letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+.eyebrow{font:500 .74rem/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.lede{color:var(--muted);font-size:1.08rem;max-width:58ch}
+section{position:relative;padding-block:clamp(72px,10vw,128px)}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px;border-radius:6px}
+.btn{display:inline-flex;align-items:center;gap:.6em;font:600 .98rem/1 var(--body);padding:1em 1.5em;border-radius:999px;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:transform .25s,box-shadow .25s,background .25s}
+.btn-gold{background:linear-gradient(135deg,var(--gold-hi),var(--gold) 55%,#c9913e);color:#1a1206;box-shadow:0 10px 30px -10px rgba(230,185,101,.7)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(230,185,101,.9)}
+.btn-ghost{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(230,185,101,.08)}
+
+/* NAV */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px);background:rgba(10,16,36,.72);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand svg{width:34px;height:34px;flex:none}
+.brand b{font:700 1.18rem/1 var(--display);letter-spacing:.01em;white-space:nowrap}
+.brand small{display:block;font:500 .62rem/1.2 var(--mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:5px}
+.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0}
+.nav ul a{text-decoration:none;color:var(--muted);font-size:.94rem;transition:color .2s}
+.nav ul a:hover{color:var(--gold-hi)}
+.nav .btn{padding:.75em 1.2em;font-size:.9rem}
+@media (max-width:900px){.nav ul{display:none}}
+@media (max-width:440px){.nav .btn span{display:none}.brand small{display:none}}
+
+/* NAME SWITCHER */
+.namer{position:fixed;z-index:70;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;padding:6px;border-radius:999px;background:rgba(17,26,54,.92);border:1px solid var(--line);backdrop-filter:blur(12px);box-shadow:0 20px 50px -20px #000;max-width:calc(100% - 32px)}
+.namer span{font:500 .62rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);padding:0 8px 0 10px;white-space:nowrap}
+.namer button{font:600 .82rem/1 var(--body);color:var(--muted);background:none;border:0;padding:.7em 1em;border-radius:999px;cursor:pointer;white-space:nowrap;transition:.25s}
+.namer button[aria-pressed="true"]{background:var(--gold);color:#1a1206}
+.namer{overflow-x:auto;scrollbar-width:none}.namer::-webkit-scrollbar{display:none}
+@media (max-width:560px){.namer span{display:none}.namer button{padding:.7em .75em;font-size:.76rem}}
+
+/* HERO */
+.hero{padding-block:clamp(40px,7vw,90px) clamp(60px,8vw,110px);overflow:hidden}
+#qi{position:absolute;inset:0;width:100%;height:100%;opacity:.9;pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 75% 40%,rgba(230,185,101,.16),transparent 70%),radial-gradient(40% 40% at 10% 90%,rgba(143,208,180,.10),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(32px,5vw,72px);align-items:center}
+.hero h1{font-size:clamp(2.7rem,6.6vw,5.6rem);font-weight:800;letter-spacing:-.02em;margin:22px 0 24px}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--gold-hi),var(--gold) 40%,var(--jade));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.creds{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.creds div{font:500 .76rem/1 var(--mono);letter-spacing:.06em;padding:.8em 1em;border-radius:999px;border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.03)}
+.creds div i{font-style:normal;color:var(--gold);margin-right:.5em}
+.portrait{position:relative;justify-self:center;width:min(100%,430px)}
+.arch{position:relative;aspect-ratio:4/5;max-width:100%;border-radius:999px 999px 28px 28px;overflow:hidden;border:1px solid rgba(246,217,154,.35);box-shadow:0 0 0 10px rgba(230,185,101,.05),0 40px 90px -30px rgba(230,185,101,.45)}
+.arch img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;transform:scale(1.04);transition:transform 1.2s}
+.portrait:hover .arch img{transform:scale(1.09)}
+.halo{position:absolute;inset:-9%;border-radius:50%;border:1px dashed rgba(230,185,101,.28);animation:spin 60s linear infinite;pointer-events:none}
+.halo::before{content:"";position:absolute;top:8%;left:12%;width:12px;height:12px;border-radius:50%;background:var(--gold-hi);box-shadow:0 0 18px 4px var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.float-card{position:absolute;left:-14%;bottom:12%;padding:14px 18px;border-radius:18px;background:rgba(17,26,54,.86);border:1px solid var(--line);backdrop-filter:blur(10px);display:flex;gap:12px;align-items:center;animation:bob 6s ease-in-out infinite}
+.float-card b{font:700 1.5rem/1 var(--display);color:var(--gold-hi)}
+.float-card small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
+@keyframes bob{50%{transform:translateY(-10px)}}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.portrait{width:min(78%,380px)}.float-card{left:-6%}}
+
+/* MARQUEE */
+.marquee{border-block:1px solid var(--line);padding-block:20px;overflow:hidden;background:var(--deep)}
+.marquee .track{display:flex;gap:48px;width:max-content;animation:scroll 38s linear infinite}
+.marquee span{font:500 clamp(1.1rem,2.2vw,1.6rem)/1 var(--display);white-space:nowrap;color:var(--muted);display:flex;align-items:center;gap:48px}
+.marquee span::after{content:"✦";color:var(--gold);font-size:.7em}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* TREASURES */
+.treasures .head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:56px}
+@media (max-width:820px){.treasures .head{grid-template-columns:1fr}}
+.orbs{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,3vw,40px);position:relative}
+.orbs svg.threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5}
+.orb{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;position:relative;z-index:1}
+.orb .ball{width:min(100%,220px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),transparent 40%),radial-gradient(circle,var(--c1),var(--c2) 70%);box-shadow:0 0 50px -6px var(--c1),inset 0 0 40px rgba(255,255,255,.12)}
+.orb .ball::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:1px solid var(--c1);opacity:.35;transition:.5s}
+.orb .ball b{font:800 clamp(2.6rem,7vw,5rem)/1 var(--display);color:#fff8e6;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+.orb:hover .ball,.orb[aria-pressed="true"] .ball{transform:translateY(-8px) scale(1.04);box-shadow:0 0 90px 4px var(--c1),inset 0 0 40px rgba(255,255,255,.2)}
+.orb[aria-pressed="true"] .ball::after{inset:-22px;opacity:.8;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{inset:-30px;opacity:.25}}
+.orb .nm{font:700 1.35rem/1 var(--display)}
+.orb .nm small{display:block;font:500 .7rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.o1{--c1:#e9b56a;--c2:#7a4a1c}.o2{--c1:#cfe08a;--c2:#4c6a2a}.o3{--c1:#9fd6e6;--c2:#2b5b70}
+.treasure-panel{margin-top:48px;padding:clamp(24px,4vw,40px);border-radius:var(--r);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--line);display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center}
+.treasure-panel .big{font:800 clamp(4rem,9vw,7rem)/1 var(--display);color:var(--gold-hi);opacity:.9}
+.treasure-panel h3{font-size:1.7rem;margin-bottom:10px}
+.treasure-panel p{color:var(--muted);max-width:60ch}
+.treasure-panel .pairs{display:flex;flex-direction:column;gap:8px;min-width:200px}
+.treasure-panel .pairs div{font:500 .82rem/1.3 var(--mono);padding:.7em 1em;border-radius:12px;background:rgba(230,185,101,.08);color:var(--gold-hi)}
+@media (max-width:820px){.treasure-panel{grid-template-columns:1fr}.treasure-panel .big{display:none}}
+@media (max-width:520px){.orb .nm{font-size:1rem}.orb .nm small{font-size:.55rem;letter-spacing:.1em}}
+
+/* MENU / PRICING */
+.menu{background:linear-gradient(180deg,var(--ink),var(--deep) 30%,var(--deep) 70%,var(--ink))}
+.tabs{display:flex;gap:6px;padding:6px;border-radius:999px;border:1px solid var(--line);width:max-content;max-width:100%;margin:40px 0 32px;background:rgba(0,0,0,.2);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;font:600 .95rem/1 var(--body);padding:.85em 1.4em;border-radius:999px;color:var(--muted);white-space:nowrap;transition:.25s}
+.tabs button[aria-selected="true"]{background:var(--text);color:var(--ink)}
+.panel{display:grid;grid-template-columns:1.1fr .9fr;gap:24px}
+@media (max-width:860px){.panel{grid-template-columns:1fr}}
+.card{border-radius:var(--r);background:var(--panel);border:1px solid var(--line);padding:clamp(22px,3.5vw,38px);position:relative;overflow:hidden;min-width:0}
+.price-dial{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.price{font:800 clamp(3.6rem,9vw,6rem)/.9 var(--display);color:var(--gold-hi);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.price sup{font-size:.4em;vertical-align:top;margin-right:4px;color:var(--gold)}
+.price.call{font-size:clamp(2rem,5vw,3rem);line-height:1.1}
+.mins{font:500 .82rem/1 var(--mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:28px 0 8px}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:1em .4em;border-radius:14px;border:1px solid var(--line);font:600 1rem/1 var(--body);transition:.25s}
+.seg button small{display:block;font:400 .72rem/1 var(--mono);color:var(--muted);margin-top:6px}
+.seg button[aria-pressed="true"]{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+.seg button[aria-pressed="true"] small{color:#3d2a0c}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{all:unset;cursor:pointer;font:500 .88rem/1 var(--body);padding:.75em 1.1em;border-radius:999px;border:1px solid var(--line);color:var(--muted);transition:.25s}
+.chip[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);background:rgba(143,208,180,.08)}
+.style-note{margin-top:16px;color:var(--muted);min-height:3.3em}
+.side-list{display:flex;flex-direction:column;gap:14px}
+.side-list .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding-bottom:14px;border-bottom:1px dashed var(--line)}
+.side-list .row:last-child{border:0;padding:0}
+.side-list .row b{font:700 1.15rem/1.2 var(--display)}
+.side-list .row span{font:500 1.1rem/1 var(--mono);color:var(--gold-hi);font-variant-numeric:tabular-nums;white-space:nowrap}
+.side-list .row small{display:block;color:var(--muted);font-size:.85rem;margin-top:4px;font-family:var(--body)}
+.acu{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media (max-width:700px){.acu{grid-template-columns:1fr}}
+.acu .card h3{font-size:1.6rem;margin:14px 0 6px}
+.acu ul{margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;color:var(--muted)}
+.acu li::before{content:"✦";color:var(--gold);margin-right:10px;font-size:.7em}
+.ribbon{position:absolute;top:22px;right:-38px;transform:rotate(45deg);background:var(--jade);color:#0c2a20;font:600 .66rem/1 var(--mono);letter-spacing:.14em;padding:.6em 3em;text-transform:uppercase}
+.community{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media (max-width:700px){.community{grid-template-columns:1fr}}
+.community .card{min-height:260px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.community .card.soon{background:repeating-linear-gradient(135deg,rgba(255,255,255,.02) 0 14px,transparent 14px 28px),var(--panel)}
+.community h3{font-size:1.8rem;margin-top:12px}
+
+/* MODALITIES */
+.mods{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px}
+@media (max-width:900px){.mods{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.mods{grid-template-columns:1fr}}
+.mod{all:unset;cursor:pointer;position:relative;border-radius:var(--r);padding:28px;min-height:250px;background:var(--panel);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:16px;transition:border-color .4s,transform .4s;transform-style:preserve-3d}
+.mod::before{content:"";position:absolute;inset:0;background:radial-gradient(300px circle at var(--mx,50%) var(--my,0%),rgba(230,185,101,.18),transparent 60%);opacity:0;transition:opacity .4s}
+.mod:hover::before,.mod:focus-visible::before{opacity:1}
+.mod:hover{border-color:rgba(230,185,101,.5)}
+.mod .glyph{font:800 2.6rem/1 var(--display);color:var(--gold);opacity:.85}
+.mod h3{font-size:1.45rem}
+.mod .front p{color:var(--muted);font-size:.95rem;margin-top:8px}
+.mod .back{display:none;color:var(--text);font-size:.95rem}
+.mod .back div{margin-top:10px}
+.mod .back b{font:500 .7rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px}
+.mod[aria-expanded="true"] .back{display:block}
+.mod[aria-expanded="true"] .front p{display:none}
+.mod .tap{font:500 .7rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.mod[aria-expanded="true"]{border-color:var(--gold);background:linear-gradient(160deg,#1d2850,var(--panel))}
+
+/* FINDER + BREATH */
+.duo{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;margin-top:52px}
+@media (max-width:900px){.duo{grid-template-columns:1fr}}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0}
+@media (max-width:520px){.goals{grid-template-columns:repeat(2,1fr)}}
+.goal{all:unset;cursor:pointer;padding:16px;border-radius:16px;border:1px solid var(--line);text-align:center;font:600 .95rem/1.2 var(--body);transition:.25s}
+.goal i{display:block;font-style:normal;font:700 1.6rem/1 var(--display);color:var(--gold);margin-bottom:8px}
+.goal[aria-pressed="true"]{background:rgba(230,185,101,.12);border-color:var(--gold)}
+.result{border-radius:18px;padding:22px;background:rgba(0,0,0,.25);border:1px solid var(--line);min-height:150px}
+.result h4{font:700 1.35rem/1.2 var(--display);margin:6px 0 8px;color:var(--gold-hi)}
+.result p{color:var(--muted)}
+.breath{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.bo{width:200px;height:200px;max-width:100%;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle,rgba(169,212,230,.55),rgba(43,91,112,.4) 70%);box-shadow:0 0 60px -10px var(--mist);transform:scale(.72);transition:transform 4s cubic-bezier(.45,0,.55,1)}
+.bo span{font:700 1.3rem/1 var(--display);transform:scale(1.35)}
+.bo.in{transform:scale(1)}
+.breath .count{font:500 .8rem/1 var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+
+/* RESEARCH */
+.research{background:radial-gradient(70% 60% at 50% 0%,rgba(169,212,230,.08),transparent 70%)}
+.stats{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:52px}
+.stat{grid-column:span 4;border-radius:var(--r);padding:28px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;min-width:0}
+.stat.wide{grid-column:span 8;flex-direction:row;align-items:center;gap:28px}
+.stat.wide>div{min-width:0}
+@media (max-width:980px){.stat{grid-column:span 6}.stat.wide{grid-column:span 12}}
+@media (max-width:620px){.stat,.stat.wide{grid-column:span 12}.stat.wide{flex-direction:column;align-items:flex-start}}
+.num{font:800 clamp(2.8rem,5.5vw,4.4rem)/.9 var(--display);color:var(--gold-hi);font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap}
+.num small{font-size:.45em;color:var(--gold)}
+.stat p{color:var(--text);font-size:1rem}
+.src{font:400 .74rem/1.45 var(--mono);color:var(--faint);margin-top:auto}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar i{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,var(--jade),var(--gold));border-radius:99px;transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+.compare{display:flex;flex-direction:column;gap:10px;width:100%}
+.compare div{display:grid;grid-template-columns:52px 1fr 58px;gap:12px;align-items:center;font:500 .8rem/1 var(--mono);color:var(--muted)}
+.quotes{margin-top:64px;border-radius:var(--r);border:1px solid var(--line);padding:clamp(28px,5vw,56px);position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(230,185,101,.07),transparent 60%)}
+.quotes::before{content:"“";position:absolute;top:-30px;left:20px;font:800 12rem/1 var(--display);color:var(--gold);opacity:.12}
+.quotes blockquote{margin:0;font:500 clamp(1.4rem,3.2vw,2.3rem)/1.3 var(--display);max-width:30ch;min-height:4.2em;transition:opacity .5s}
+.quotes cite{display:block;margin-top:20px;font:400 .82rem/1.4 var(--mono);color:var(--muted);font-style:normal;transition:opacity .5s}
+.dots{display:flex;gap:8px;margin-top:26px}
+.dots button{all:unset;cursor:pointer;width:28px;height:4px;border-radius:9px;background:rgba(255,255,255,.18);transition:.3s}
+.dots button[aria-current="true"]{background:var(--gold);width:48px}
+
+/* ABOUT */
+.about .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(32px,6vw,80px);align-items:center}
+@media (max-width:860px){.about .wrap{grid-template-columns:1fr}}
+.stack{position:relative;aspect-ratio:4/5;max-width:100%}
+.stack img{position:absolute;object-fit:cover;border-radius:var(--r);border:1px solid var(--line);box-shadow:0 30px 60px -30px #000}
+.stack .a{inset:0 18% 14% 0;width:82%;height:86%;object-position:50% 20%}
+.stack .b{right:0;bottom:0;width:55%;height:42%;object-position:30% 50%;border-color:rgba(230,185,101,.45)}
+.mv{display:flex;flex-direction:column;gap:18px;margin-top:34px}
+.mv details{border-radius:18px;border:1px solid var(--line);background:var(--panel);padding:22px 24px;transition:border-color .3s}
+.mv details[open]{border-color:rgba(230,185,101,.5)}
+.mv summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font:700 1.3rem/1 var(--display)}
+.mv summary::-webkit-details-marker{display:none}
+.mv summary::after{content:"+";font:400 1.6rem/1 var(--body);color:var(--gold);transition:transform .3s}
+.mv details[open] summary::after{transform:rotate(45deg)}
+.mv details p{color:var(--muted);margin-top:14px}
+.mv details p strong{color:var(--text);font-weight:600}
+
+/* WHO */
+.who{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
+@media (max-width:900px){.who{grid-template-columns:repeat(2,1fr)}}
+.who div{padding:26px;border-radius:var(--r);border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.who b{display:block;font:700 1.25rem/1.2 var(--display);margin:14px 0 6px}
+.who p{color:var(--muted);font-size:.93rem}
+.who svg{width:34px;height:34px;color:var(--gold)}
+.partners{margin-top:24px;padding:clamp(24px,4vw,40px);border-radius:var(--r);background:linear-gradient(120deg,#1b2a52,#13203f);border:1px solid var(--line);display:flex;justify-content:space-between;gap:24px;align-items:center;flex-wrap:wrap}
+.partners h3{font-size:clamp(1.4rem,3vw,2rem);max-width:24ch}
+
+/* GALLERY */
+.gallery{display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-auto-rows:clamp(160px,22vw,280px);gap:14px;margin-top:48px}
+.gallery figure{margin:0;border-radius:var(--r);overflow:hidden;position:relative;border:1px solid var(--line)}
+.gallery figure:first-child{grid-row:span 2}
+.gallery img{width:100%;height:100%;object-fit:cover;transition:transform 1s}
+.gallery figure:hover img{transform:scale(1.06)}
+.gallery figcaption{position:absolute;left:14px;bottom:14px;font:500 .7rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:.6em .9em;border-radius:999px;background:rgba(10,16,36,.75);backdrop-filter:blur(6px)}
+@media (max-width:700px){.gallery{grid-template-columns:1fr 1fr}.gallery figure:first-child{grid-column:span 2;grid-row:span 1}}
+
+/* BOOK */
+.book .card{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,48px);background:radial-gradient(80% 100% at 100% 0%,rgba(230,185,101,.16),transparent 60%),var(--panel)}
+@media (max-width:860px){.book .card{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.field label{font:500 .72rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.field select,.field input{font:500 1rem/1.2 var(--body);color:var(--text);background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:.9em 1em;width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.summary{border-radius:18px;padding:24px;background:var(--ink);border:1px dashed rgba(230,185,101,.45);font:400 .95rem/1.7 var(--body);color:var(--muted);white-space:pre-line;min-height:180px}
+.summary b{color:var(--gold-hi);font-weight:600}
+.contact-line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.phone{font:700 1.5rem/1 var(--display);user-select:all}
+.toast{font:500 .8rem/1 var(--mono);color:var(--jade);min-height:1em}
+
+footer{border-top:1px solid var(--line);padding-block:56px calc(110px + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.9rem}
+footer .wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:40px}
+@media (max-width:760px){footer .wrap{grid-template-columns:1fr}}
+footer .refs{font:400 .74rem/1.6 var(--mono);color:var(--faint)}
+footer .refs a{color:var(--muted)}
+footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
+
+.reveal{transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .9s}
+.reveal.pre{transform:translateY(26px);opacity:.001}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal.pre{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="lotus" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M32 12c6 7 8 15 0 30-8-15-6-23 0-30Z"/><path d="M32 42c-4-11-12-18-22-19 0 10 8 19 22 19Z"/><path d="M32 42c4-11 12-18 22-19 0 10-8 19-22 19Z"/><path d="M8 44c8 6 40 6 48 0"/></g></symbol>
+</svg>
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top" style="color:var(--gold)"><svg><use href="#lotus"/></svg><span style="color:var(--text)"><b data-brand>The Eastern Glow</b><small>Acupuncture · Massage · TCM</small></span></a>
+    <ul>
+      <li><a href="#treasures">Philosophy</a></li>
+      <li><a href="#menu">Services</a></li>
+      <li><a href="#modalities">Modalities</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <a class="btn btn-gold" href="#book">Book<span>&nbsp;a visit</span></a>
+  </div>
+</nav>
+
+<div class="namer" role="group" aria-label="Preview business name">
+  <span>Name preview</span>
+  <button type="button" data-name="glow" aria-pressed="true">Eastern Glow</button>
+  <button type="button" data-name="wave" aria-pressed="false">Still Wave</button>
+  <button type="button" data-name="petal" aria-pressed="false">Quiet Petal</button>
+  <button type="button" data-name="domain" aria-pressed="false">HolisticMedicine.com</button>
+</div>
+
+<header class="hero" id="top">
+  <canvas id="qi" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Mobile Traditional Chinese Medicine · Long Island, NY</div>
+      <h1 id="heroLine">Let your body remember how to <em>glow.</em></h1>
+      <p class="lede">Acupuncture, therapeutic massage and time-tested Eastern modalities like fire cupping with moxibustion, gua sha and electrical stimulation, brought to you and your community.</p>
+      <div class="cta">
+        <a class="btn btn-gold" href="#book">Book your session →</a>
+        <a class="btn btn-ghost" href="#menu">See services &amp; pricing</a>
+      </div>
+      <div class="creds">
+        <div><i>✦</i>(516) 206-7722 · Northport, NY</div>
+        <div><i>✦</i>Master of Acupuncture</div>
+        <div><i>✦</i>LMT · Licensed Massage Therapist</div>
+        <div><i>✦</i>Mobile · I come to you</div>
+      </div>
+    </div>
+    <div class="portrait">
+      <div class="halo" aria-hidden="true"></div>
+      <div class="arch"><img src="img/f5.jpg" alt="Jackie, acupuncturist and licensed massage therapist, smiling in a white practitioner's coat" fetchpriority="high"></div>
+      <div class="float-card"><svg style="width:34px;height:34px;color:var(--gold)"><use href="#lotus"/></svg><div><b>All ages</b><small>Seniors, children &amp;<br>geriatric communities welcome</small></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true"><div class="track">
+  <span>Acupuncture</span><span>Fire cupping</span><span>Moxibustion</span><span>Gua sha</span><span>Electrical stimulation</span><span>Medical massage</span><span>Relaxation massage</span><span>Restorative massage</span><span>TCM treatment planning</span><span>Herbal referrals</span>
+  <span>Acupuncture</span><span>Fire cupping</span><span>Moxibustion</span><span>Gua sha</span><span>Electrical stimulation</span><span>Medical massage</span><span>Relaxation massage</span><span>Restorative massage</span><span>TCM treatment planning</span><span>Herbal referrals</span>
+</div></div>
+
+<section class="treasures" id="treasures">
+  <div class="wrap">
+    <div class="head reveal">
+      <div><div class="eyebrow">The Three Treasures · 三寶</div><h2 style="margin-top:18px">Healing from the inside out.</h2></div>
+      <p class="lede">Traditional Chinese Medicine sees health as three connected forces. When essence, energy and spirit move together, the body does what it was built to do: repair, rest and renew. Tap a treasure to see how each session supports it.</p>
+    </div>
+    <div class="orbs" role="group" aria-label="The Three Treasures">
+      <svg class="threads" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="#e6b965" stroke-width=".3"><path d="M50 40 C 100 10, 200 70, 250 40"/><path d="M50 40 C 100 70, 200 10, 250 40"/><path d="M50 45 C 120 25, 180 60, 250 45"/></g></svg>
+      <button class="orb o1" data-t="0" aria-pressed="true"><span class="ball"><b>精</b></span><span class="nm">Jing<small>Essence</small></span></button>
+      <button class="orb o2" data-t="1" aria-pressed="false"><span class="ball"><b>氣</b></span><span class="nm">Qi<small>Vital energy</small></span></button>
+      <button class="orb o3" data-t="2" aria-pressed="false"><span class="ball"><b>神</b></span><span class="nm">Shen<small>Spirit &amp; mind</small></span></button>
+    </div>
+    <div class="treasure-panel" aria-live="polite">
+      <div class="big" id="tBig">精</div>
+      <div><div class="eyebrow" id="tEy">Jing · Essence</div><h3 id="tH" style="margin-top:12px">Your foundation.</h3><p id="tP">Jing is the deep reserve you draw on to grow, recover and age well. Stress, poor sleep and overwork drain it. Restorative care helps you rebuild instead of running on empty.</p></div>
+      <div class="pairs" id="tPairs"><div>Restorative massage</div><div>TCM treatment planning</div><div>Herbal referrals</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="menu" id="menu">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">Services &amp; pricing</div><h2 style="margin-top:18px;max-width:18ch">Choose the care your body is asking for.</h2></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" aria-controls="p-mass" id="t-mass">Massage therapy</button>
+      <button role="tab" aria-selected="false" aria-controls="p-acu" id="t-acu">Acupuncture &amp; TCM</button>
+      <button role="tab" aria-selected="false" aria-controls="p-com" id="t-com">Community care</button>
+    </div>
+
+    <div role="tabpanel" id="p-mass" aria-labelledby="t-mass" class="panel">
+      <div class="card">
+        <div class="price-dial">
+          <div><div class="mins" id="mLen">90 minute session</div><div class="price" id="mPrice"><sup>$</sup>175</div></div>
+          <svg width="96" height="96" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="8"/><circle id="mRing" cx="50" cy="50" r="42" fill="none" stroke="url(#gg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="66" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)"/><defs><linearGradient id="gg"><stop offset="0" stop-color="#8fd0b4"/><stop offset="1" stop-color="#f6d99a"/></linearGradient></defs></svg>
+        </div>
+        <div class="seg" role="group" aria-label="Session length">
+          <button data-m="60" data-p="135" aria-pressed="false">60<small>min</small></button>
+          <button data-m="75" data-p="155" aria-pressed="false">75<small>min</small></button>
+          <button data-m="90" data-p="175" aria-pressed="true">90<small>min</small></button>
+          <button data-m="120" data-p="" aria-pressed="false">2 hr<small>min 120</small></button>
+        </div>
+        <div class="chips" role="group" aria-label="Massage focus">
+          <button class="chip" data-s="medical" aria-pressed="true">Medical</button>
+          <button class="chip" data-s="relax" aria-pressed="false">Relaxation</button>
+          <button class="chip" data-s="restore" aria-pressed="false">Restorative</button>
+        </div>
+        <p class="style-note" id="sNote">Targeted work for pain, injury recovery and tight, overworked muscles, with focus on the areas that need it most.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Massage menu · LMT</div>
+        <div class="side-list" style="margin-top:22px">
+          <div class="row"><div><b>60 minutes</b><small>Focused session</small></div><span>$135</span></div>
+          <div class="row"><div><b>75 minutes</b><small>Room to address more areas</small></div><span>$155</span></div>
+          <div class="row"><div><b>90 minutes</b><small>Full-body, unhurried</small></div><span>$175</span></div>
+          <div class="row"><div><b>2 hours</b><small>The deepest reset</small></div><span>Call</span></div>
+        </div>
+        <p style="color:var(--muted);margin-top:22px;font-size:.92rem">Every massage can include Eastern modalities such as cupping, gua sha or moxibustion when they fit your goals.</p>
+      </div>
+    </div>
+
+    <div role="tabpanel" id="p-acu" aria-labelledby="t-acu" class="acu" hidden>
+      <div class="card"><div class="ribbon">Start here</div>
+        <div class="eyebrow">Initial visit · 90 min</div>
+        <div class="price" style="margin-top:14px"><sup>$</sup>180</div>
+        <h3>Your first acupuncture visit</h3>
+        <p style="color:var(--muted)">A full intake and TCM assessment, followed by your first treatment.</p>
+        <ul><li>Health history &amp; goals</li><li>Tongue and pulse assessment</li><li>Personalized TCM treatment plan</li><li>Herbal referrals when appropriate</li></ul>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Follow-up visit · 60 min</div>
+        <div class="price" style="margin-top:14px"><sup>$</sup>120</div>
+        <h3>Continuing care</h3>
+        <p style="color:var(--muted)">Builds on your plan as your body responds.</p>
+        <ul><li>Acupuncture treatment</li><li>Electrical stimulation as needed</li><li>Fire cupping with moxibustion</li><li>Plan check-in &amp; adjustments</li></ul>
+      </div>
+    </div>
+
+    <div role="tabpanel" id="p-com" aria-labelledby="t-com" class="community" hidden>
+      <div class="card">
+        <div><div class="eyebrow">Community Day · Fridays</div><h3>$40 sessions, all day.</h3><p style="color:var(--muted);margin-top:10px">An all-day community clinic on select Fridays from 8 AM to 3 PM, so wellness stays within reach.</p></div>
+        <div class="price">$40</div>
+      </div>
+      <div class="card soon">
+        <div><div class="eyebrow" style="color:var(--jade)">Coming soon</div><h3>Pay-What-You-Can Day</h3><p style="color:var(--muted);margin-top:10px">Care offered at whatever you're able to give. Dates will be announced here.</p></div>
+        <div class="mins">Date to be announced</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modalities">
+  <div class="wrap">
+    <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:28px;align-items:end">
+      <div><div class="eyebrow">Modalities</div><h2 style="margin-top:18px">Ancient tools, modern hands.</h2></div>
+      <p class="lede">Natural health modalities chosen to help your body reach its highest potential for healing. Tap any card to learn what it feels like.</p>
+    </div>
+    <div class="mods">
+      <button class="mod" aria-expanded="false"><div class="glyph">針</div><div class="front"><h3>Acupuncture</h3><p>Fine, sterile needles placed along meridian points to move qi and calm the nervous system.</p></div><div class="back"><h3>Acupuncture</h3><div><b>What it feels like</b>A light tap, then a dull, heavy warmth. Most people drift into deep calm.</div><div><b>Often sought for</b>Chronic pain, headaches, stress, sleep</div></div><span class="tap">Tap to explore</span></button>
+      <button class="mod" aria-expanded="false"><div class="glyph">火</div><div class="front"><h3>Fire cupping + moxibustion</h3><p>Warmed glass cups create gentle suction while moxa, a slow-burning herb, warms key points.</p></div><div class="back"><h3>Fire cupping + moxibustion</h3><div><b>What it feels like</b>A deep, pulling stretch paired with a soothing, radiant warmth.</div><div><b>Often sought for</b>Tight backs and shoulders, cold-type fatigue, sluggish circulation</div></div><span class="tap">Tap to explore</span></button>
+      <button class="mod" aria-expanded="false"><div class="glyph">刮</div><div class="front"><h3>Gua sha</h3><p>Smooth-edged tools glide across the skin to release tension and boost surface circulation.</p></div><div class="back"><h3>Gua sha</h3><div><b>What it feels like</b>Firm, rhythmic strokes that leave muscles loose and skin glowing.</div><div><b>Often sought for</b>Neck and shoulder tension, stiffness, facial and body wellness</div></div><span class="tap">Tap to explore</span></button>
+      <button class="mod" aria-expanded="false"><div class="glyph">電</div><div class="front"><h3>Electrical stimulation</h3><p>A mild current connects acupuncture points for a stronger, steady therapeutic signal.</p></div><div class="back"><h3>Electrical stimulation</h3><div><b>What it feels like</b>A gentle tingling or tapping pulse, adjusted to your comfort.</div><div><b>Often sought for</b>Stubborn pain, muscle recovery, nerve-related discomfort</div></div><span class="tap">Tap to explore</span></button>
+      <button class="mod" aria-expanded="false"><div class="glyph">按</div><div class="front"><h3>Massage therapy</h3><p>Medical, relaxation and restorative massage from a licensed massage therapist.</p></div><div class="back"><h3>Massage therapy</h3><div><b>What it feels like</b>Pressure tailored to you, from soothing and slow to deep and targeted.</div><div><b>Often sought for</b>Muscle pain, stress, recovery, better sleep</div></div><span class="tap">Tap to explore</span></button>
+      <button class="mod" aria-expanded="false"><div class="glyph">草</div><div class="front"><h3>TCM planning + herbal referrals</h3><p>A personalized treatment plan rooted in Traditional Chinese Medicine, with herbal referrals available.</p></div><div class="back"><h3>TCM planning + herbal referrals</h3><div><b>What it includes</b>A plan built around your pattern, not just your symptoms.</div><div><b>Good to know</b>Herbal formulas are referred to qualified herbal providers.</div></div><span class="tap">Tap to explore</span></button>
+    </div>
+
+    <div class="duo">
+      <div class="card">
+        <div class="eyebrow">Find your session</div>
+        <h3 style="font-size:1.7rem;margin-top:12px">What's bringing you in?</h3>
+        <div class="goals" role="group" aria-label="Your goal">
+          <button class="goal" data-g="pain" aria-pressed="false"><i>痛</i>Pain</button>
+          <button class="goal" data-g="stress" aria-pressed="true"><i>靜</i>Stress</button>
+          <button class="goal" data-g="sleep" aria-pressed="false"><i>眠</i>Sleep</button>
+          <button class="goal" data-g="energy" aria-pressed="false"><i>氣</i>Energy</button>
+          <button class="goal" data-g="glow" aria-pressed="false"><i>美</i>Natural glow</button>
+          <button class="goal" data-g="recover" aria-pressed="false"><i>復</i>Recovery</button>
+        </div>
+        <div class="result" aria-live="polite"><div class="eyebrow">Suggested for you</div><h4 id="gH">90-min Relaxation Massage + Acupuncture</h4><p id="gP">Calm the nervous system first, then use acupuncture to help your body stay out of fight-or-flight between visits.</p></div>
+      </div>
+      <div class="card breath">
+        <div class="eyebrow">Take one breath with us</div>
+        <div class="bo" id="bo"><span id="bt">Begin</span></div>
+        <div class="count" id="bc">4-second box breathing</div>
+        <button class="btn btn-ghost" id="bBtn" type="button">Start breathing</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="research" id="research">
+  <div class="wrap">
+    <div class="reveal" style="max-width:760px"><div class="eyebrow">What the research says</div><h2 style="margin-top:18px">Stress lives in the body. So does relief.</h2><p class="lede" style="margin-top:20px">Modern research keeps catching up with what Eastern medicine has practiced for centuries. Here's what the evidence shows about massage, acupuncture and stress.</p></div>
+    <div class="stats">
+      <div class="stat wide reveal">
+        <div class="num" data-to="83" data-suf="%">83%</div>
+        <div><p>Of 18 massage studies in a 2024 systematic review, 15 found a significant drop in anxiety. Researchers concluded manual therapies "consistently decrease anxiety intensity."</p><div class="src" style="margin-top:12px">West &amp; Huzij, Journal of Osteopathic Medicine, 2024 · 34 studies reviewed</div></div>
+      </div>
+      <div class="stat reveal">
+        <div class="num" data-to="31" data-pre="−" data-suf="%">−31%</div>
+        <p>Average drop in the stress hormone cortisol after massage, with serotonin up 28% and dopamine up 31%.</p>
+        <div class="src">Field et al., Int. Journal of Neuroscience, 2005 · review of 30+ studies</div>
+      </div>
+      <div class="stat reveal">
+        <div class="num" data-to="20827">20,827</div>
+        <p>Patients across 39 trials showed acupuncture outperformed both sham and no acupuncture for chronic pain, and the effect can't be explained by placebo alone.</p>
+        <div class="src">Vickers et al., The Journal of Pain, 2018</div>
+      </div>
+      <div class="stat reveal">
+        <div class="num" data-to="85" data-pre="~" data-suf="%">~85%</div>
+        <p>Of acupuncture's pain-relief effect was still present a full year after treatment ended.</p>
+        <div class="bar"><i style="--w:85%"></i></div>
+        <div class="src">Same meta-analysis: effect declined about 15% at 12 months</div>
+      </div>
+      <div class="stat reveal">
+        <div class="num" data-to="400" data-suf="%">400%</div>
+        <p>Increase in surface microcirculation in the minutes after gua sha, with every participant reporting less pain.</p>
+        <div class="src">Nielsen et al., Explore, 2007 · small pilot study (11 adults)</div>
+      </div>
+      <div class="stat wide reveal">
+        <div class="num" data-to="800">800</div>
+        <div><p>Adults 65 and older with chronic low back pain took part in a 2025 NIH-funded trial. Acupuncture groups had less pain-related disability at 6 and 12 months than usual care, plus fewer anxiety symptoms.</p><div class="src" style="margin-top:12px">BackInAction trial, JAMA Network Open, Sept 2025</div></div>
+      </div>
+      <div class="stat reveal">
+        <div class="num" data-to="83" data-suf="%">83%</div>
+        <p>Of U.S. adults stressed by societal division reported at least one physical stress symptom in the past month, like anxiety, fatigue or headaches.</p>
+        <div class="src">APA Stress in America™, Nov 2025</div>
+      </div>
+      <div class="stat wide reveal">
+        <div style="flex:none"><div class="num" data-to="36.7" data-dec="1" data-suf="%">36.7%</div></div>
+        <div style="width:100%">
+          <p>Of U.S. adults now use complementary health approaches, nearly double 2002. Acupuncture use more than doubled.</p>
+          <div class="compare" style="margin-top:16px">
+            <div><span>2002</span><div class="bar"><i style="--w:19.2%"></i></div><span>19.2%</span></div>
+            <div><span>2022</span><div class="bar"><i style="--w:36.7%"></i></div><span>36.7%</span></div>
+          </div>
+          <div class="src" style="margin-top:12px">NIH / NCCIH analysis of National Health Interview Survey, 2024</div>
+        </div>
+      </div>
+      <div class="stat reveal" style="grid-column:span 12">
+        <p style="font:600 1.25rem/1.4 var(--display)">The American College of Physicians lists massage and acupuncture among the first treatments to try for acute low back pain, before medication. Acupuncture is also a first-line option for chronic low back pain.</p>
+        <div class="src">ACP Clinical Practice Guideline, Annals of Internal Medicine, 2017</div>
+      </div>
+    </div>
+
+    <div class="quotes reveal">
+      <blockquote id="q">Treating illness after it appears is like digging a well only once you are thirsty.</blockquote>
+      <cite id="qc">Huangdi Neijing (The Yellow Emperor's Classic of Medicine), paraphrased</cite>
+      <div class="dots" role="group" aria-label="Choose quote"></div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="wrap">
+    <div class="stack reveal">
+      <img class="a" src="img/f2.jpg" alt="Jackie placing acupuncture needles during a treatment">
+      <img class="b" src="img/f3.jpg" alt="A client relaxing during a massage session">
+    </div>
+    <div>
+      <div class="eyebrow">Meet your practitioner</div>
+      <h2 style="margin-top:18px">Hi, I'm Jackie.</h2>
+      <p class="lede" style="margin-top:20px">I'm a Master of Acupuncture and Licensed Massage Therapist, and I bring the sanctuary to you. My mission is simple: maximize your body's highest potential for healing through natural health modalities, with care that treats the whole person.</p>
+      <div class="mv">
+        <details open>
+          <summary>Mission</summary>
+          <p>My mission is delivering restorative experiences rooted in holistic healing through the practice of Traditional Chinese Medicine, <strong>optimizing you from the inside out.</strong> Enter a sanctuary where sight and scent come together to meet healing. Enhanced by customized TCM herbal referrals, modalities and treatment planning, you'll experience natural treatments that support your whole-body wellness and the way you carry yourself in the world.</p>
+        </details>
+        <details>
+          <summary>Vision</summary>
+          <p>To create an environment that nurtures you, <strong>body and spirit</strong>, and to carry that vision into communities as a cornerstone for wellness and recovery. I invite you, along with private organizations, public institutions and hospitals, to join in shaping a future where wellness is accessible and transformative.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="reveal"><div class="eyebrow">Mobile care · All ages welcome</div><h2 style="margin-top:18px;max-width:20ch">Healing that comes to you.</h2></div>
+    <div class="who">
+      <div class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 21V7l8-4 8 4v14M9 21v-5h6v5M12 8v4M10 10h4"/></svg><b>Hospitals &amp; institutions</b><p>Restorative care that supports patients, residents and staff where they already are.</p></div>
+      <div class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="7" r="3"/><path d="M3 21c0-4 3-6 6-6s6 2 6 6M17 11a3 3 0 1 0 0-6M21 21c0-3-1.5-5-4-5.7"/></svg><b>Seniors &amp; geriatric communities</b><p>Gentle, adaptive care for older adults, in homes and senior living.</p></div>
+      <div class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="6" r="3"/><path d="M8 21v-5l-2-3 6-2 6 2-2 3v5"/></svg><b>Children</b><p>Kid-friendly sessions adjusted for smaller bodies and shorter attention spans.</p></div>
+      <div class="reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg><b>Workplaces &amp; events</b><p>Bring restorative care to your team, clinic or community event.</p></div>
+    </div>
+    <div class="partners reveal">
+      <h3>Hospitals, institutions and organizations: let's build wellness together.</h3>
+      <a class="btn btn-gold" href="#book">Start a partnership</a>
+    </div>
+    <div class="gallery">
+      <figure class="reveal"><img src="img/f1.jpg" alt="Jackie welcoming a client" loading="lazy"><figcaption>Welcome in</figcaption></figure>
+      <figure class="reveal"><img src="img/f4.jpg" alt="A client resting peacefully during acupuncture" loading="lazy"><figcaption>Acupuncture</figcaption></figure>
+      <figure class="reveal"><img src="img/f3.jpg" alt="Massage therapy session" loading="lazy" style="object-position:30% 50%"><figcaption>Massage</figcaption></figure>
+      <figure class="reveal" style="grid-column:span 2"><img src="img/treasures.jpg" alt="Jing, Qi and Shen, the Three Treasures" loading="lazy"><figcaption>精 · 氣 · 神</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="book" id="book">
+  <div class="wrap">
+    <div class="card reveal">
+      <div>
+        <div class="eyebrow">Book your appointment</div>
+        <h2 style="margin-top:16px">Your reset starts with one call.</h2>
+        <p class="lede" style="margin-top:16px">Build your visit below, then call or text to confirm a time.</p>
+        <form id="bk" style="margin-top:26px" novalidate>
+          <div class="field"><label for="bkSvc">Service</label>
+            <select id="bkSvc">
+              <option value="Massage · 60 min · $135">Massage · 60 min · $135</option>
+              <option value="Massage · 75 min · $155">Massage · 75 min · $155</option>
+              <option value="Massage · 90 min · $175" selected>Massage · 90 min · $175</option>
+              <option value="Massage · 2 hours · call for pricing">Massage · 2 hours · call for pricing</option>
+              <option value="Acupuncture initial visit · 90 min · $180">Acupuncture initial visit · 90 min · $180</option>
+              <option value="Acupuncture follow-up · 60 min · $120">Acupuncture follow-up · 60 min · $120</option>
+              <option value="Community Day Friday · $40">Community Day Friday · $40</option>
+              <option value="Partnership / group inquiry">Partnership / group inquiry</option>
+            </select></div>
+          <div class="two">
+            <div class="field"><label for="bkWhere">Where</label><select id="bkWhere"><option>At Jackie's office (opening soon)</option><option>Somewhere near me or a mutual spot</option><option>Senior living community</option><option>Hospital or care facility</option><option>Organization or workplace</option><option>Community group</option></select></div>
+            <div class="field"><label for="bkWhen">Preferred time</label><select id="bkWhen"><option>Weekday morning</option><option>Weekday afternoon</option><option>Weekday evening</option><option>Weekend</option></select></div>
+          </div>
+          <div class="field"><label for="bkName">Your name</label><input id="bkName" placeholder="First name"></div>
+        </form>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;min-width:0">
+        <div class="eyebrow" style="margin-bottom:12px">Your request</div>
+        <div class="summary" id="sum"></div>
+        <div class="contact-line">
+          <button class="btn btn-gold" id="copy" type="button">Copy request</button>
+          <span class="toast" id="toast" role="status"></span>
+        </div>
+        <div style="margin-top:22px"><div class="mins" style="margin-bottom:8px">Call or text to book</div><div class="phone" id="phone">(516) 206-7722</div><div style="color:var(--faint);font-size:.82rem;margin-top:6px">Northport · Long Island, NY · Mobile service</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="brand" href="#top" style="color:var(--gold)"><svg><use href="#lotus"/></svg><span style="color:var(--text)"><b data-brand>The Eastern Glow</b><small>Acupuncture · Massage · TCM</small></span></a>
+      <p style="margin-top:18px;max-width:46ch">Mobile acupuncture, massage therapy and Traditional Chinese Medicine based in Northport, NY, serving Long Island. Seniors, children and geriatric communities welcome.</p>
+      <p style="margin-top:14px;font:700 1.2rem/1.3 var(--display);color:var(--text);user-select:all">(516) 206-7722</p>
+      <p style="color:var(--muted);font-size:.85rem">Northport, NY · Call for an appointment today</p>
+      <p class="disc">Services complement, and do not replace, care from your physician. Results vary from person to person. Talk with your doctor about any medical condition, pregnancy or medication before starting treatment.</p>
+      <p style="margin-top:16px;font-size:.82rem">© 2026 <span data-brand>The Eastern Glow</span></p>
+    </div>
+    <div class="refs">
+      <div class="eyebrow" style="margin-bottom:14px">Research sources</div>
+      West &amp; Huzij, J Osteopath Med 2024;124(11):487–497<br>
+      Field et al., Int J Neurosci 2005;115(10):1397–1413<br>
+      Vickers et al., J Pain 2018;19(5):455–474<br>
+      Nielsen et al., Explore 2007;3(5):456–466<br>
+      DeBar et al., BackInAction, JAMA Netw Open, Sept 2, 2025<br>
+      Nahin et al., NCCIH / JAMA 2024 (NHIS 2002–2022)<br>
+      American Psychological Association, Stress in America™ 2025<br>
+      Qaseem et al., ACP Guideline, Ann Intern Med 2017
+    </div>
+  </div>
+</footer>
+
+<script>
+(()=>{
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* Name preview */
+const NAMES={glow:{n:"The Eastern Glow",h:'Let your body remember how to <em>glow.</em>'},wave:{n:"The Still Wave",h:'Find the calm beneath <em>the wave.</em>'},petal:{n:"Quiet Petal",h:'Unfold, one <em>quiet breath</em> at a time.'},domain:{n:"HolisticMedicine.com",h:'Holistic medicine, <em>brought to your door.</em>'}};
+function setName(k){const d=NAMES[k];if(!d)return;$$('[data-brand]').forEach(e=>e.textContent=d.n);$('#heroLine').innerHTML=d.h;document.title=d.n;$$('.namer button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.name===k));try{localStorage.setItem('brand',k)}catch(e){};renderSum()}
+$$('.namer button').forEach(b=>b.onclick=()=>setName(b.dataset.name));
+
+/* Qi flow canvas */
+const cv=$('#qi'),cx=cv.getContext('2d');let W,H,P=[],mouse={x:-999,y:-999};
+function size(){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);P=Array.from({length:Math.min(140,Math.floor(W*H/9000))},()=>({x:Math.random()*W,y:Math.random()*H,l:Math.random()*200,c:Math.random()<.75?'230,185,101':'143,208,180'}))}
+cv.parentElement.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});
+let t=0;function step(){t+=.003;cx.fillStyle='rgba(10,16,36,.08)';cx.fillRect(0,0,W,H);for(const p of P){const a=Math.sin(p.x*.004+t)*Math.cos(p.y*.005-t)*Math.PI*2;let vx=Math.cos(a)*.9,vy=Math.sin(a)*.9;const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.hypot(dx,dy);if(d<140){vx+=dx/d*1.6;vy+=dy/d*1.6}const ox=p.x,oy=p.y;p.x+=vx;p.y+=vy;p.l--;cx.strokeStyle=`rgba(${p.c},.55)`;cx.lineWidth=1.1;cx.beginPath();cx.moveTo(ox,oy);cx.lineTo(p.x,p.y);cx.stroke();if(p.l<0||p.x<0||p.x>W||p.y<0||p.y>H){p.x=Math.random()*W;p.y=Math.random()*H;p.l=100+Math.random()*200}}requestAnimationFrame(step)}
+size();addEventListener('resize',size);if(!RM)step();
+
+/* Treasures */
+const T=[{b:'精',e:'Jing · Essence',h:'Your foundation.',p:"Jing is the deep reserve you draw on to grow, recover and age well. Stress, poor sleep and overwork drain it. Restorative care helps you rebuild instead of running on empty.",s:['Restorative massage','TCM treatment planning','Herbal referrals']},{b:'氣',e:'Qi · Vital energy',h:'Your flow.',p:"Qi moves through pathways called meridians. When it gets stuck you feel it as pain, tension or fatigue. TCM's oldest saying sums it up: where there is free flow, there is no pain.",s:['Acupuncture','Electrical stimulation','Fire cupping + moxibustion','Gua sha']},{b:'神',e:'Shen · Spirit & mind',h:'Your calm.',p:"Shen is your mental and emotional clarity. It shows in your eyes, your sleep and how you handle stress. Settling the nervous system lets the spirit rest and the body heal.",s:['Relaxation massage','Acupuncture for stress','Box breathing practice']}];
+$$('.orb').forEach(o=>o.onclick=()=>{const d=T[o.dataset.t];$$('.orb').forEach(x=>x.setAttribute('aria-pressed',x===o));$('#tBig').textContent=d.b;$('#tEy').textContent=d.e;$('#tH').textContent=d.h;$('#tP').textContent=d.p;$('#tPairs').innerHTML=d.s.map(x=>`<div>${x}</div>`).join('')});
+
+/* Tabs */
+$$('[role=tab]').forEach(tb=>tb.onclick=()=>{$$('[role=tab]').forEach(x=>{x.setAttribute('aria-selected',x===tb);$('#'+x.getAttribute('aria-controls')).hidden=x!==tb})});
+
+/* Massage dial */
+const NOTES={medical:"Targeted work for pain, injury recovery and tight, overworked muscles, with focus on the areas that need it most.",relax:"Slow, flowing pressure to quiet the nervous system, lower stress and help you sleep deeper.",restore:"A balanced blend that rebuilds energy and eases accumulated tension, ideal as regular maintenance."};
+$$('.seg button').forEach(b=>b.onclick=()=>{$$('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));const m=+b.dataset.m,p=b.dataset.p;$('#mLen').textContent=(m===120?'2 hour':m+' minute')+' session';const el=$('#mPrice');if(p){el.classList.remove('call');tween(el,+p)}else{el.classList.add('call');el.textContent='Call for pricing'}$('#mRing').style.strokeDashoffset=264-264*(m/120)});
+$$('.chip').forEach(c=>c.onclick=()=>{$$('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c));$('#sNote').textContent=NOTES[c.dataset.s]});
+function tween(el,to){const from=parseInt(el.textContent.replace(/\D/g,''))||to,st=performance.now();const f=n=>{const k=Math.min(1,(n-st)/600),v=Math.round(from+(to-from)*(1-Math.pow(1-k,3)));el.innerHTML='<sup>$</sup>'+v;if(k<1)requestAnimationFrame(f)};RM?el.innerHTML='<sup>$</sup>'+to:requestAnimationFrame(f)}
+
+/* Modality cards */
+$$('.mod').forEach(m=>{m.onclick=()=>{const o=m.getAttribute('aria-expanded')==='true';m.setAttribute('aria-expanded',!o)};m.onpointermove=e=>{const r=m.getBoundingClientRect();m.style.setProperty('--mx',(e.clientX-r.left)+'px');m.style.setProperty('--my',(e.clientY-r.top)+'px')}});
+
+/* Finder */
+const G={pain:['75-min Medical Massage + Acupuncture','Medical massage loosens what hurts; acupuncture and e-stim help the relief last longer.'],stress:['90-min Relaxation Massage + Acupuncture','Calm the nervous system first, then use acupuncture to help your body stay out of fight-or-flight between visits.'],sleep:['Acupuncture initial visit (90 min)','A full TCM assessment to find what is keeping you up, with a plan built around calming Shen.'],energy:['Acupuncture + fire cupping with moxibustion','Warming moxa and cupping get stagnant qi moving again, a classic approach for low energy.'],glow:['Restorative Massage + gua sha','Gua sha boosts surface circulation for a natural, healthy glow inside and out.'],recover:['90-min Restorative Massage','Unhurried bodywork to rebuild after illness, injury or a hard season, with a follow-up plan.']};
+$$('.goal').forEach(g=>g.onclick=()=>{$$('.goal').forEach(x=>x.setAttribute('aria-pressed',x===g));const[h,p]=G[g.dataset.g];$('#gH').textContent=h;$('#gP').textContent=p});
+
+/* Breath */
+let bt=null;const bo=$('#bo'),btx=$('#bt'),bc=$('#bc'),bb=$('#bBtn');
+bb.onclick=()=>{if(bt){clearInterval(bt);bt=null;bo.classList.remove('in');btx.textContent='Begin';bc.textContent='4-second box breathing';bb.textContent='Start breathing';return}const ph=[['Breathe in',1],['Hold',1],['Breathe out',0],['Hold',0]];let i=0,c=4,round=1;const tick=()=>{btx.textContent=ph[i][0];bo.classList.toggle('in',!!ph[i][1]);bc.textContent=c+' · round '+round+' of 4';c--;if(c<1){c=4;i=(i+1)%4;if(i===0){round++;if(round>4){clearInterval(bt);bt=null;btx.textContent='Well done';bc.textContent='Notice how you feel';bb.textContent='Start again';bo.classList.remove('in')}}}};tick();bt=setInterval(tick,1000);bb.textContent='Stop'};
+
+/* Quotes */
+const Q=[["Treating illness after it appears is like digging a well only once you are thirsty.","Huangdi Neijing (The Yellow Emperor's Classic of Medicine), paraphrased"],["Where there is free flow, there is no pain.","Traditional Chinese Medicine maxim · 通則不痛"],["Manual therapies consistently decrease anxiety intensity.","West & Huzij, Journal of Osteopathic Medicine, 2024"],["The effect was positive and sustained.","Dr. Lynn DeBar, lead researcher, BackInAction trial (NIH), 2025"]];
+const dots=$('.dots');let qi=0,qt;Q.forEach((_,i)=>{const b=document.createElement('button');b.setAttribute('aria-label','Quote '+(i+1));b.onclick=()=>{showQ(i);clearInterval(qt)};dots.appendChild(b)});
+function showQ(i){qi=i;const q=$('#q'),c=$('#qc');q.style.opacity=c.style.opacity=0;setTimeout(()=>{q.textContent=Q[i][0];c.textContent=Q[i][1];q.style.opacity=c.style.opacity=1},RM?0:400);[...dots.children].forEach((d,j)=>d.setAttribute('aria-current',j===i))}
+showQ(0);if(!RM)qt=setInterval(()=>showQ((qi+1)%Q.length),6500);
+
+/* Counters + reveal */
+const fmt=(v,dec)=>dec?v.toFixed(dec):Math.round(v).toLocaleString();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;io.unobserve(el);if(el.classList.contains('reveal')){el.classList.remove('pre');}el.querySelectorAll('.num[data-to]').forEach(n=>{if(RM)return;const to=+n.dataset.to,dec=+(n.dataset.dec||0),pre=n.dataset.pre||'',suf=n.dataset.suf||'',st=performance.now();const f=t=>{const k=Math.min(1,(t-st)/1500);n.textContent=pre+fmt(to*(1-Math.pow(1-k,4)),dec)+suf;if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)});el.querySelectorAll('.bar i').forEach(b=>{const w=b.style.getPropertyValue('--w');if(RM)return;b.style.width='0';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=w))})}),{threshold:.2});
+$$('.reveal').forEach(el=>{const r=el.getBoundingClientRect();if(r.top>innerHeight&&!RM)el.classList.add('pre');io.observe(el)});
+
+/* Booking summary */
+const PHONE=$('#phone').textContent;
+function renderSum(){const brand=document.title,nm=$('#bkName').value.trim();$('#sum').innerHTML=`Hi Jackie${nm?', this is <b>'+nm.replace(/[<>&]/g,'')+'</b>':''}! I'd like to book with ${brand}.\n\n<b>Service:</b> ${$('#bkSvc').value}\n<b>Location:</b> ${$('#bkWhere').value}\n<b>Preferred time:</b> ${$('#bkWhen').value}\n\nWhat openings do you have?`}
+['#bkSvc','#bkWhere','#bkWhen','#bkName'].forEach(s=>$(s).addEventListener('input',renderSum));
+$('#bk').addEventListener('submit',e=>e.preventDefault());
+$('#copy').onclick=()=>{const txt=$('#sum').innerText;const ok=()=>{$('#toast').textContent='Copied. Paste it into a text to Jackie.'};const fb=()=>{const r=document.createRange();r.selectNodeContents($('#sum'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#toast').textContent='Selected. Copy it with your keyboard or long-press.'};try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}};
+
+let saved='glow';try{saved=localStorage.getItem('brand')||'glow'}catch(e){}
+setName(saved);
+})();
+</script>
+
+</body>
+</html>
