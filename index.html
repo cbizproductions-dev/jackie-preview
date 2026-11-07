@@ -143,6 +143,9 @@ section{position:relative;padding-block:clamp(72px,10vw,128px)}
 .side-list{display:flex;flex-direction:column;gap:14px}
 .side-list .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding-bottom:14px;border-bottom:1px dashed var(--line)}
 .side-list .row:last-child{border:0;padding:0}
+.travel{display:flex;gap:14px;align-items:center;margin-top:22px;padding:14px 16px;border-radius:14px;border:1px solid rgba(143,208,180,.35);background:rgba(143,208,180,.07)}
+.travel b{font:700 1.4rem/1 var(--display);color:var(--jade);white-space:nowrap}
+.travel span{color:var(--text);font-size:.92rem;line-height:1.4}
 .side-list .row b{font:700 1.15rem/1.2 var(--display)}
 .side-list .row span{font:500 1.1rem/1 var(--mono);color:var(--gold-hi);font-variant-numeric:tabular-nums;white-space:nowrap}
 .side-list .row small{display:block;color:var(--muted);font-size:.85rem;margin-top:4px;font-family:var(--body)}
@@ -371,13 +374,13 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
     <div role="tabpanel" id="p-mass" aria-labelledby="t-mass" class="panel">
       <div class="card">
         <div class="price-dial">
-          <div><div class="mins" id="mLen">90 minute session</div><div class="price" id="mPrice"><sup>$</sup>175</div></div>
+          <div><div class="mins" id="mLen">90 minute session</div><div class="price" id="mPrice"><sup>$</sup>180</div></div>
           <svg width="96" height="96" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="8"/><circle id="mRing" cx="50" cy="50" r="42" fill="none" stroke="url(#gg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="66" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)"/><defs><linearGradient id="gg"><stop offset="0" stop-color="#8fd0b4"/><stop offset="1" stop-color="#f6d99a"/></linearGradient></defs></svg>
         </div>
         <div class="seg" role="group" aria-label="Session length">
-          <button data-m="60" data-p="135" aria-pressed="false">60<small>min</small></button>
-          <button data-m="75" data-p="155" aria-pressed="false">75<small>min</small></button>
-          <button data-m="90" data-p="175" aria-pressed="true">90<small>min</small></button>
+          <button data-m="60" data-p="140" aria-pressed="false">60<small>min</small></button>
+          <button data-m="75" data-p="160" aria-pressed="false">75<small>min</small></button>
+          <button data-m="90" data-p="180" aria-pressed="true">90<small>min</small></button>
           <button data-m="120" data-p="" aria-pressed="false">2 hr<small>min 120</small></button>
         </div>
         <div class="chips" role="group" aria-label="Massage focus">
@@ -385,17 +388,19 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
           <button class="chip" data-s="relax" aria-pressed="false">Relaxation</button>
           <button class="chip" data-s="restore" aria-pressed="false">Restorative</button>
         </div>
+        <p class="mins" style="margin-top:14px;color:var(--jade)">+ $20 travel fee for mobile visits</p>
         <p class="style-note" id="sNote">Targeted work for pain, injury recovery and tight, overworked muscles, with focus on the areas that need it most.</p>
       </div>
       <div class="card">
-        <div class="eyebrow">Massage menu · LMT</div>
+        <div class="eyebrow">Mobile massage menu · LMT</div>
         <div class="side-list" style="margin-top:22px">
-          <div class="row"><div><b>60 minutes</b><small>Focused session</small></div><span>$135</span></div>
-          <div class="row"><div><b>75 minutes</b><small>Room to address more areas</small></div><span>$155</span></div>
-          <div class="row"><div><b>90 minutes</b><small>Full-body, unhurried</small></div><span>$175</span></div>
+          <div class="row"><div><b>60 minutes</b><small>Focused session</small></div><span>$140</span></div>
+          <div class="row"><div><b>75 minutes</b><small>Room to address more areas</small></div><span>$160</span></div>
+          <div class="row"><div><b>90 minutes</b><small>Full-body, unhurried</small></div><span>$180</span></div>
           <div class="row"><div><b>2 hours</b><small>The deepest reset</small></div><span>Call</span></div>
         </div>
-        <p style="color:var(--muted);margin-top:22px;font-size:.92rem">Every massage can include Eastern modalities such as cupping, gua sha or moxibustion when they fit your goals.</p>
+        <div class="travel"><b>+$20</b><span>Travel fee for mobile visits. One flat rate, any session length.</span></div>
+        <p style="color:var(--muted);margin-top:18px;font-size:.92rem">Every massage can include Eastern modalities such as cupping, gua sha or moxibustion when they fit your goals.</p>
       </div>
     </div>
 
@@ -587,9 +592,9 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
         <form id="bk" style="margin-top:26px" novalidate>
           <div class="field"><label for="bkSvc">Service</label>
             <select id="bkSvc">
-              <option value="Massage · 60 min · $135">Massage · 60 min · $135</option>
-              <option value="Massage · 75 min · $155">Massage · 75 min · $155</option>
-              <option value="Massage · 90 min · $175" selected>Massage · 90 min · $175</option>
+              <option value="Massage · 60 min · $140">Massage · 60 min · $140</option>
+              <option value="Massage · 75 min · $160">Massage · 75 min · $160</option>
+              <option value="Massage · 90 min · $180" selected>Massage · 90 min · $180</option>
               <option value="Massage · 2 hours · call for pricing">Massage · 2 hours · call for pricing</option>
               <option value="Acupuncture initial visit · 90 min · $180">Acupuncture initial visit · 90 min · $180</option>
               <option value="Acupuncture follow-up · 60 min · $120">Acupuncture follow-up · 60 min · $120</option>
@@ -694,7 +699,7 @@ $$('.reveal').forEach(el=>{const r=el.getBoundingClientRect();if(r.top>innerHeig
 
 /* Booking summary */
 const PHONE=$('#phone').textContent;
-function renderSum(){const brand=document.title,nm=$('#bkName').value.trim();$('#sum').innerHTML=`Hi Jackie${nm?', this is <b>'+nm.replace(/[<>&]/g,'')+'</b>':''}! I'd like to book with ${brand}.\n\n<b>Service:</b> ${$('#bkSvc').value}\n<b>Location:</b> ${$('#bkWhere').value}\n<b>Preferred time:</b> ${$('#bkWhen').value}\n\nWhat openings do you have?`}
+function renderSum(){const brand=document.title,nm=$('#bkName').value.trim();$('#sum').innerHTML=`Hi Jackie${nm?', this is <b>'+nm.replace(/[<>&]/g,'')+'</b>':''}! I'd like to book with ${brand}.\n\n<b>Service:</b> ${$('#bkSvc').value}\n<b>Location:</b> ${$('#bkWhere').value}\n<b>Preferred time:</b> ${$('#bkWhen').value}${/office/i.test($('#bkWhere').value)?'':'\n<b>Travel fee:</b> $20 (mobile visit)'}\n\nWhat openings do you have?`}
 ['#bkSvc','#bkWhere','#bkWhen','#bkName'].forEach(s=>$(s).addEventListener('input',renderSum));
 $('#bk').addEventListener('submit',e=>e.preventDefault());
 $('#copy').onclick=()=>{const txt=$('#sum').innerText;const ok=()=>{$('#toast').textContent='Copied. Paste it into a text to Jackie.'};const fb=()=>{const r=document.createRange();r.selectNodeContents($('#sum'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#toast').textContent='Selected. Copy it with your keyboard or long-press.'};try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}};
