@@ -44,7 +44,7 @@ export function Count({ value, fmt = (n: number) => String(n) }: { value: number
 // ---------------- header with screen-print art ----------------
 export function Header({ kicker, title, sources, notion, art = 'couch' }: { kicker: string; title: string; sources: string; notion: string; art?: keyof typeof ART }) {
   const s = useSnap();
-  const a = ART[art];
+  const a = s?.art?.[art] ?? ART[art];
   return (
     <header className="hdr">
       {a && <svg className="art" viewBox={`0 0 ${a.w} ${a.h}`} preserveAspectRatio="xMaxYMax meet" aria-hidden="true" dangerouslySetInnerHTML={{ __html: a.paths }} />}

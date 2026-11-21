@@ -105,7 +105,14 @@ export const SOURCES: SourceDef[] = [
   page('calendar', 'Rolling 60-Day Calendar', 'Muse', '4178b67fa84e81d5a551c62aa4d62c46', 1, (md) => ({ calendar: P.parseCalendar(md) })),
   page('cash', 'Cash Flow Radar', 'Claude', '41e8b67fa84e818283ffdb9b4b8af4e4', 1, (md) => ({ cashMoves: P.todos(md, /money moves/i) })),
   page('strategy', 'Strategy Room', 'Claude', '41e8b67fa84e8128a28aced006840039', 4, (md) => ({ experimentTodos: P.todos(md), futures: P.futures(md) })),
-  page('runbook', 'Pulse generator & runbook (data.json)', 'Claude', '41e8b67fa84e816fa932f429411bd3ed', 1, (md) => ({ cc: P.codeJson(md, /^data\.json/i) ?? {} })),
+  page('runbook', 'Pulse generator & runbook (data.json)', 'Claude', '41e8b67fa84e816fa932f429411bd3ed', 1, (md) => {
+    const art: Record<string, { w: number; h: number; paths: string }> = {};
+    for (const n of ['couch', 'la', 'redcarpet']) {
+      const j = P.codeJson(md, new RegExp(`${n}_trace\\.json`, 'i')) as { w?: number; h?: number; paths?: string } | null;
+      if (j && j.w && j.h && typeof j.paths === 'string') art[n] = { w: j.w, h: j.h, paths: j.paths };
+    }
+    return { cc: P.codeJson(md, /^data\.json/i) ?? {}, art };
+  }),
   page('system', 'System, Sources & Maintenance', 'Claude', '41e8b67fa84e812b805de57f67067498', 3, (md) => ({
     system: { dictionary: P.table(md, /metric dictionary|every headline metric/i), rules: P.bulletList(md, /counting rules/i), limitations: P.bulletList(md, /known limitations/i) },
     _sourceMap: P.table(md, /source map/i),

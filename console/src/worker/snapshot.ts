@@ -93,7 +93,7 @@ const EMPTY: Omit<Snapshot, 'generatedAt' | 'today' | 'mode' | 'state' | 'failed
   calendar: { refreshed: null, lastVerified: null, days: [] }, briefs: [], contracts: [], leases: { rows: null },
   cashMoves: [], experimentTodos: [], members: [], tunesat: { rows: [], note: '' },
   system: { dictionary: [], rules: [], limitations: [] },
-  career: { figures: [], timeline: [], verifiedCredits: [], reportedCredits: [], inMotion: [] }, futures: [], cc: {},
+  career: { figures: [], timeline: [], verifiedCredits: [], reportedCredits: [], inMotion: [] }, futures: [], cc: {}, art: {},
 };
 
 export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): Snapshot {

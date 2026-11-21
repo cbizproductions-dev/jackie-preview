@@ -126,7 +126,7 @@ export function todaysMoves(s: Snapshot, limit = 6): Move[] {
   for (const b of s.briefs) {
     const due = b.round2 && b.round2End && b.round2End >= t ? b.round2 : b.due;
     const end = b.round2End ?? due;
-    if (due && end && end >= t && due <= week && !/submitted|paid|passed|expired|not taking/i.test(b.status ?? ''))
+    if (due && end && end >= t && due <= week && !/submitted|paid|passed|expired|not taking|contract/i.test(b.status ?? ''))
       out.push({ what: `${b.company ?? ''} ${b.brief}${b.round2 ? ' — round 2' : ''}`.trim(), why: `Due ${labelDay(due)}${b.round2End && b.round2End !== due ? `–${labelDay(b.round2End, { month: 'short', day: 'numeric' })}` : ''}`, source: 'Brief Board — Maestro', url: b.url, cat: 'deadline', sort: daysBetween(t, due) });
   }
   for (const c of s.contracts) {

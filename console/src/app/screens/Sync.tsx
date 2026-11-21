@@ -9,8 +9,8 @@ export default function Sync() {
   const s = useSnap();
   const { bind, el } = useTip();
   const { ref: chartRef, w: W } = useWidth();
-  const active = s.briefs.filter((b) => ['New', 'Committed', 'In progress', 'Contract'].includes(b.status ?? ''));
-  const groups = ['In progress', 'Committed', 'Contract', 'New'].map((g) => ({ g, rows: active.filter((b) => b.status === g) })).filter((x) => x.rows.length);
+  const active = s.briefs.filter((b) => ['New', 'Committed', 'In progress'].includes(b.status ?? ''));
+  const groups = ['In progress', 'Committed', 'New'].map((g) => ({ g, rows: active.filter((b) => b.status === g) })).filter((x) => x.rows.length);
   const working = s.cc?.active_briefs as { kicker: string; rows: string[][]; note: string } | undefined;
   const conv = briefConversion(s.briefs);
   const lean = s.insights.find((i) => /lean|library/i.test(i.title) && /\$/.test(i.observation));

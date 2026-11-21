@@ -242,6 +242,8 @@ export const Snapshot = z.object({
   system: z.object({ dictionary: z.array(z.array(z.string())), rules: z.array(z.string()), limitations: z.array(z.string()) }),
   career: z.object({ figures: z.array(z.array(z.string())), timeline: z.array(z.array(z.string())), verifiedCredits: z.array(z.string()), reportedCredits: z.array(z.string()), inMotion: z.array(z.string()) }),
   futures: z.array(z.object({ name: z.string(), body: z.string() })),
+  /** Screen-print header art (traced from Kris's own photos), read from the runbook page. */
+  art: z.record(z.object({ w: z.number(), h: z.number(), paths: z.string() })).default({}),
   cc: CommandCenterData,
 });
 export type Snapshot = z.infer<typeof Snapshot>;
