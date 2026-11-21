@@ -13,7 +13,7 @@ not_found_handling = "none"
 
 [[kv_namespaces]]
 binding = "SNAP"
-id = "REPLACE_WITH_KV_ID"   # set by `npx wrangler kv namespace create SNAP` (see README)
+id = "4601f4c5ff27423a8317fdf81cb165ac"   # set by `npx wrangler kv namespace create SNAP` (see README)
 
 [vars]
 NOTION_CALL_BUDGET = "40"   # Workers Free allows 50 outbound requests per visit; raise to ~400 on Workers Paid
