@@ -230,3 +230,35 @@ details.math .well { font: 13px/1.5 var(--font-num); color: var(--ink-2); margin
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Larger reading size (Kris, Nov 21): full-screen app only; the Notion embed keeps its compact size ---------- */
+.shell:not(.embedded) { font-size: 16px; }
+.shell:not(.embedded) .sub,
+.shell:not(.embedded) .moves .why,
+.shell:not(.embedded) .banner { font-size: 15px; }
+.shell:not(.embedded) .cap,
+.shell:not(.embedded) .moves .src,
+.shell:not(.embedded) .meter .msub,
+.shell:not(.embedded) .hdr .asof,
+.shell:not(.embedded) .legend { font-size: 13px; }
+.shell:not(.embedded) .label,
+.shell:not(.embedded) .meter .label,
+.shell:not(.embedded) .strip { font-size: 14px; }
+.shell:not(.embedded) table.tbl { font-size: 15px; }
+.shell:not(.embedded) .tbl th { font-size: 13px; }
+.shell:not(.embedded) .chart text { font-size: 12px; }
+.shell:not(.embedded) .mid { font-size: 24px; }
+.tabbar a, .tabbar button { font-size: 13px; }
+@media (min-width: 960px) {
+  .shell:not(.embedded) { font-size: 17px; }
+  .shell:not(.embedded) .sub, .shell:not(.embedded) .moves .why, .shell:not(.embedded) .banner { font-size: 16px; }
+  .shell:not(.embedded) .cap, .shell:not(.embedded) .moves .src, .shell:not(.embedded) .meter .msub, .shell:not(.embedded) .hdr .asof, .shell:not(.embedded) .legend { font-size: 14px; }
+  .shell:not(.embedded) .label, .shell:not(.embedded) .meter .label, .shell:not(.embedded) .strip { font-size: 15px; }
+  .shell:not(.embedded) table.tbl { font-size: 16px; }
+  .shell:not(.embedded) .tbl th { font-size: 14px; }
+  .shell:not(.embedded) .led-name, .shell:not(.embedded) .led-word { font-size: 13px; }
+  .shell:not(.embedded) .meter .val { font-size: 34px; }
+  .shell:not(.embedded) .rail a { font-size: 16px; }
+  .shell:not(.embedded) .chart text { font-size: 13px; }
+  .shell:not(.embedded) .mid { font-size: 26px; }
+}
