@@ -10,6 +10,11 @@ Running log so another Claude session can pick up. Newest first within each sect
 - [x] Phase 4a — deployed to Kris's Cloudflare (cbizproductions@gmail.com): `cbiz-console.localsite-studio.workers.dev`, KV `SNAP`, secrets ACCESS_KEY + NOTION_TOKEN (set by Kris). **All 21 sources read live** as of Nov 21 ~2:09 PM ET; headline numbers and all ten lights match the Command Center.
 - [x] Phase 4b — renamed to **C-BIZ OFFICIAL DASHBOARD** (Kris, Nov 21; the Worker/URL and repo folder keep the name `console`). Notion page "🎛️ C-BIZ OFFICIAL DASHBOARD (test)" created under the Command Center (embed + Open full screen + one line) and one line added to Claude Daily Updates. Nothing else in HQ was changed.
 
+## Command Center changes (Kris approved, Nov 21)
+- Chart images retired: the "C-BIZ Command Center daily refresh" scheduled task now skips building/uploading SVG panels and keeps everything else (databases, home tiles, Data-as-of stamps, Cash Flow checklist, data.json, Maintenance Log). Existing images stay but no longer update.
+- One link callout added at the top of the Command Center home page pointing to the Dashboard.
+- The "Command Center refresh watch" task is unchanged.
+
 ## Deploy notes (Nov 21)
 - This sandbox's proxy injects the Cloudflare token into every api.cloudflare.com request, which breaks wrangler's static-asset upload (it needs its own upload JWT). So the built app is **embedded in the Worker** (`scripts/embed-assets.mjs` → `src/worker/assets.gen.ts`, git-ignored) and served by the Worker; `npm run deploy` does build → embed → deploy. `keep_vars = true` protects dashboard-set values.
 - First live run starts from the build-time capture (`seed-state:v1` in KV) so a failed or not-yet-read source shows captured data marked Partial, never a blank screen. Not-yet-read sources make the snapshot Partial.
