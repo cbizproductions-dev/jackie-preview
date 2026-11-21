@@ -88,7 +88,8 @@ export default {
     const url = new URL(req.url);
     const m = /^\/c\/([^/]+)(\/.*)?$/.exec(url.pathname);
     if (!m || !safeEqual(m[1], env.ACCESS_KEY ?? '')) return notFound();
-    const rest = m[2] ?? '/';
+    if (!m[2]) return new Response(null, { status: 308, headers: { ...SECURITY_HEADERS, Location: `${url.pathname}/${url.search}` } });
+    const rest = m[2];
     if (rest === '/api/snapshot') return getSnapshot(env, ctx, url);
     if (rest.startsWith('/api/')) return notFound();
     // Static app files (built by Vite). Unknown paths fall back to index.html (hash routing).

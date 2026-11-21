@@ -95,7 +95,7 @@ describe('Access model', () => {
     const e = env();
     e.kv.set('seed:v1', JSON.stringify({ generatedAt: '2026-11-21T16:00:00Z', mode: 'seed' }));
     const res = await worker.fetch(new Request(`https://x.dev/c/${e.ACCESS_KEY}/api/snapshot`), e, ctx);
-    expect((await res.json()).mode).toBe('seed');
+    expect(((await res.json()) as any).mode).toBe('seed');
     expect(SECURITY_HEADERS['X-Robots-Tag']).toBeTruthy();
   });
 });

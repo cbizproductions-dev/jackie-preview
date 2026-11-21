@@ -30,7 +30,7 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
   const order = [...SOURCES].sort((a, b) => (state.sources[a.id]?.checkedAt ?? '').localeCompare(state.sources[b.id]?.checkedAt ?? ''));
   const pending: string[] = [];
   for (const def of order) {
-    const s: SrcState = { lastEdited: null, checkedAt: null, readAt: null, data: null, ...(state.sources[def.id] ?? {}) };
+    const s: SrcState = state.sources[def.id] ? { ...state.sources[def.id] } : { lastEdited: null, checkedAt: null, readAt: null, data: null };
     const fresh = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < STALE_AFTER_MS && !opts.force;
     if (reader.calls >= opts.budget - 2) { if (!fresh || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
     try {

@@ -1,0 +1,22 @@
+# C-BIZ Console — one Worker serving the static app and a read-only /api/snapshot.
+name = "cbiz-console"
+main = "src/worker/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = true
+preview_urls = false
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = true   # every request passes the key check first; no asset is public
+not_found_handling = "none"
+
+[[kv_namespaces]]
+binding = "SNAP"
+id = "REPLACE_WITH_KV_ID"   # set by `npx wrangler kv namespace create SNAP` (see README)
+
+[vars]
+NOTION_CALL_BUDGET = "40"   # Workers Free allows 50 outbound requests per visit; raise to ~400 on Workers Paid
+
+[observability]
+enabled = false             # no request logging: the access key is in the URL path

@@ -186,7 +186,8 @@ export function healthLights(s: Snapshot): H.HealthLight[] {
 export const TRACKED_FOR_FRESHNESS = ['studio', 'calendar', 'refresh'];
 
 export function studioOps(s: Snapshot) {
-  const sessionClients = s.studio.clients.filter((c) => c.kind === 'session');
+  // Sessions with an unknown amount (before the Studio Board existed) are left out of $ averages, not counted as $0.
+  const sessionClients = s.studio.clients.filter((c) => c.kind === 'session' && c.totalPaid != null);
   const sessionRevenue = sumOrNull(sessionClients.map((c) => c.totalPaid));
   const paidSessions = sumOrNull(sessionClients.map((c) => c.paidSessions));
   const hours = sumOrNull(s.weeks.map((w) => w.paidHours));
