@@ -3,7 +3,7 @@
  * Everything lives under /c/<ACCESS_KEY>/ ; any other path (or a wrong key) is a plain 404.
  */
 import { NotionReader } from './notion';
-import { refreshPass, assemble, KEYS, STALE_AFTER_MS, type State } from './snapshot';
+import { refreshPass, assemble, KEYS, STALE_AFTER_MS, RETRY_FAILED_MS, type State } from './snapshot';
 
 export interface Env {
   SNAP: KVNamespace;
@@ -53,14 +53,16 @@ async function getSnapshot(env: Env, ctx: ExecutionContext, url: URL): Promise<R
     const age = cached ? now.getTime() - Date.parse(cached.generatedAt) : Infinity;
     const pendingKey = await env.SNAP.get('pending:v1');
     const wantsMore = url.searchParams.get('continue') === '1' && !!pendingKey;
-    if (age > STALE_AFTER_MS || wantsMore) {
+    const retryFailedSoon = cached?.state === 'partial' && age > RETRY_FAILED_MS;
+    if (age > STALE_AFTER_MS || wantsMore || retryFailedSoon) {
       const locked = await env.SNAP.get(KEYS.lock);
       if (!locked) {
         refreshing = true;
         const work = (async () => {
           await env.SNAP.put(KEYS.lock, '1', { expirationTtl: 60 });
           try {
-            const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? { sources: {} };
+            // First live run starts from the build-time capture, so a failed source shows captured data, never a blank screen.
+            const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? ((await env.SNAP.get(KEYS.seedState, 'json')) as State) ?? { sources: {} };
             const reader = new NotionReader(env.NOTION_TOKEN!);
             const { state, pending } = await refreshPass(reader, prev, { budget: Number(env.NOTION_CALL_BUDGET ?? 40), now: new Date() });
             await env.SNAP.put(KEYS.state, JSON.stringify(state));

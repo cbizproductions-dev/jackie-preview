@@ -4,6 +4,16 @@ import { Snapshot, type SourceState, type DataIssue } from '../shared/schema';
 import { consoleConflicts, freshnessOf } from '../shared/derive';
 import { nyDate } from '../shared/time';
 
+/** Turn a Notion API failure into a sentence Kris can act on. Never includes the token. */
+export function explainError(err: string): string {
+  if (/\b401\b|unauthorized/i.test(err)) return 'Notion rejected the token (check NOTION_TOKEN in Cloudflare)';
+  if (/\b404\b|object_not_found|could not find/i.test(err)) return 'Not shared with the integration (Notion → ••• → Connections → add C-BIZ Console)';
+  if (/\b403\b|restricted/i.test(err)) return 'Integration lacks Read content permission';
+  if (/\b400\b|validation/i.test(err)) return `Notion refused the request (${err.slice(0, 90)})`;
+  if (/rate-limited|\b429\b/i.test(err)) return 'Notion rate limit — will retry';
+  return `Read failed (${err.slice(0, 90)})`;
+}
+
 export type SrcState = {
   lastEdited: string | null;
   checkedAt: string | null;
@@ -15,8 +25,10 @@ export type SrcState = {
 };
 export type State = { sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null };
 
-export const KEYS = { state: 'state:v1', snapshot: 'snapshot:v1', seed: 'seed:v1', lock: 'lock:v1' } as const;
+export const KEYS = { state: 'state:v1', snapshot: 'snapshot:v1', seed: 'seed:v1', seedState: 'seed-state:v1', lock: 'lock:v1' } as const;
 export const STALE_AFTER_MS = 15 * 60 * 1000;
+/** A Partial snapshot retries its failed sources sooner. */
+export const RETRY_FAILED_MS = 2 * 60 * 1000;
 
 /**
  * One refresh pass. Probes sources whose last check is older than 15 minutes, re-reads only those whose
@@ -56,7 +68,7 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
       s.error = null;
     } catch (e) {
       s.error = String((e as Error).message ?? e).slice(0, 200); // last good data is kept in s.data
-      s.checkedAt = nowIso;
+      s.checkedAt = null; // re-check on the next pass
     }
     state.sources[def.id] = s;
   }
@@ -99,7 +111,7 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     let state: SourceState['state'] = 'fresh';
     let note = '';
     if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; }
-    else if (s.error) { state = 'failed'; note = `Last read failed — showing last good data${s.readAt ? ` from ${s.readAt.slice(0, 10)}` : ''}`; failed.push(def.name); }
+    else if (s.error) { state = 'failed'; note = `${explainError(s.error)} — ${s.data ? `showing last good data${s.readAt ? ` from ${s.readAt.slice(0, 10)}` : ''}` : 'no data yet'}`; failed.push(def.name); }
     if (def.id === 'studio' && s?.data) state = state === 'failed' ? state : freshnessOf(s.lastEdited, nowIso);
     sources.push({ id: def.id, name: def.name, owner: def.owner, kind: def.kind, url: `https://app.notion.com/p/${def.notionId}`, lastEdited: s?.lastEdited ?? null, readAt: s?.readAt ?? null, state, note });
   }
