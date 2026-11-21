@@ -7,7 +7,14 @@ Running log so another Claude session can pick up. Newest first within each sect
 - [x] Phase 1 — Worker, read-only Notion client, snapshot builder, KV caching, Zod schema, tests (rules, health, access, resilience).
 - [x] Phase 2 — design system + components (tokens in `src/app/styles/app.css`, components in `src/app/ui.tsx`)
 - [x] Phase 3 — all 12 screens (`src/app/screens/`)
-- [ ] Phase 4 — deploy + Notion page. **Blocked on Kris**: Cloudflare token (cbizproductions@gmail.com account), Notion read-only integration token, page approval.
+- [x] Phase 4a — deployed to Kris's Cloudflare (cbizproductions@gmail.com): `cbiz-console.localsite-studio.workers.dev`, KV `SNAP`, secrets ACCESS_KEY + NOTION_TOKEN (set by Kris). **All 21 sources read live** as of Nov 21 ~2:09 PM ET; headline numbers and all ten lights match the Command Center.
+- [ ] Phase 4b — Notion page "🎛️ C-BIZ Console (test)" + one log line: waiting for Kris's OK.
+
+## Deploy notes (Nov 21)
+- This sandbox's proxy injects the Cloudflare token into every api.cloudflare.com request, which breaks wrangler's static-asset upload (it needs its own upload JWT). So the built app is **embedded in the Worker** (`scripts/embed-assets.mjs` → `src/worker/assets.gen.ts`, git-ignored) and served by the Worker; `npm run deploy` does build → embed → deploy. `keep_vars = true` protects dashboard-set values.
+- First live run starts from the build-time capture (`seed-state:v1` in KV) so a failed or not-yet-read source shows captured data marked Partial, never a blank screen. Not-yet-read sources make the snapshot Partial.
+- Royalty Dashboard is too big to read whole within the free plan's 50 subrequests; the Worker reads only its top level and the table under the TuneSat heading. No such table was found on the live page, so the TuneSat card falls back to the Command Center's count.
+- Lessons: the first live attempt failed on every source with the old build and showed blank screens (fixed: fallback + plain-English error notes + 2-minute retry for Partial).
 - [~] Phase 5 — QA: everything runnable here passes (see below); Notion-embed and iPhone checks need the deployed URL.
 
 ## QA done in this session (Nov 21)

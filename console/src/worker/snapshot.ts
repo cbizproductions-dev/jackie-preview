@@ -22,6 +22,8 @@ export type SrcState = {
   dataSourceId?: string | null;
   error?: string | null;
   needsRead?: boolean;
+  /** Data is the build-time capture, not a live read yet. */
+  fromSeed?: boolean;
 };
 export type State = { sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null };
 
@@ -43,7 +45,8 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
   const pending: string[] = [];
   for (const def of order) {
     const s: SrcState = state.sources[def.id] ? { ...state.sources[def.id] } : { lastEdited: null, checkedAt: null, readAt: null, data: null };
-    const fresh = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < STALE_AFTER_MS && !opts.force;
+    if (!s.data || s.fromSeed) s.needsRead = true;
+    const fresh = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < STALE_AFTER_MS && !opts.force && !s.needsRead;
     if (reader.calls >= opts.budget - 2) { if (!fresh || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
     try {
       if (!fresh) {
@@ -64,6 +67,7 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
         s.lastEdited = r.lastEdited ?? s.lastEdited;
         s.readAt = nowIso;
         s.needsRead = false;
+        s.fromSeed = false;
       }
       s.error = null;
     } catch (e) {
@@ -110,7 +114,8 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     }
     let state: SourceState['state'] = 'fresh';
     let note = '';
-    if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; }
+    if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; failed.push(def.name); }
+    else if (s.fromSeed && !s.error) { state = 'stale'; note = 'Showing the build-time capture until the first live read'; failed.push(def.name); }
     else if (s.error) { state = 'failed'; note = `${explainError(s.error)} — ${s.data ? `showing last good data${s.readAt ? ` from ${s.readAt.slice(0, 10)}` : ''}` : 'no data yet'}`; failed.push(def.name); }
     if (def.id === 'studio' && s?.data) state = state === 'failed' ? state : freshnessOf(s.lastEdited, nowIso);
     sources.push({ id: def.id, name: def.name, owner: def.owner, kind: def.kind, url: `https://app.notion.com/p/${def.notionId}`, lastEdited: s?.lastEdited ?? null, readAt: s?.readAt ?? null, state, note });

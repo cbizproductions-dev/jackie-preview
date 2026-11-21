@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "test": "vitest run",
     "seed": "node --experimental-strip-types scripts/build-seed.ts",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && node scripts/embed-assets.mjs && wrangler deploy"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.1.0",

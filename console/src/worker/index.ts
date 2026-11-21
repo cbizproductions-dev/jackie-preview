@@ -3,11 +3,12 @@
  * Everything lives under /c/<ACCESS_KEY>/ ; any other path (or a wrong key) is a plain 404.
  */
 import { NotionReader } from './notion';
+import { EMBEDDED } from 'cbiz-assets';
 import { refreshPass, assemble, KEYS, STALE_AFTER_MS, RETRY_FAILED_MS, type State } from './snapshot';
 
 export interface Env {
   SNAP: KVNamespace;
-  ASSETS: Fetcher;
+  ASSETS?: Fetcher;
   ACCESS_KEY: string;
   NOTION_TOKEN?: string;
   NOTION_CALL_BUDGET?: string;
@@ -62,7 +63,12 @@ async function getSnapshot(env: Env, ctx: ExecutionContext, url: URL): Promise<R
           await env.SNAP.put(KEYS.lock, '1', { expirationTtl: 60 });
           try {
             // First live run starts from the build-time capture, so a failed source shows captured data, never a blank screen.
-            const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? ((await env.SNAP.get(KEYS.seedState, 'json')) as State) ?? { sources: {} };
+            const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? { sources: {} };
+            const seedState = (await env.SNAP.get(KEYS.seedState, 'json')) as State | null;
+            for (const [id, s] of Object.entries(seedState?.sources ?? {})) {
+              const cur = prev.sources[id];
+              if (!cur?.data && s.data) prev.sources[id] = { ...(cur ?? s), data: s.data, readAt: s.readAt, fromSeed: true, needsRead: true };
+            }
             const reader = new NotionReader(env.NOTION_TOKEN!);
             const { state, pending } = await refreshPass(reader, prev, { budget: Number(env.NOTION_CALL_BUDGET ?? 40), now: new Date() });
             await env.SNAP.put(KEYS.state, JSON.stringify(state));
@@ -96,7 +102,14 @@ export default {
     if (rest.startsWith('/api/')) return notFound();
     // Static app files (built by Vite). Unknown paths fall back to index.html (hash routing).
     const assetPath = rest === '/' || rest === '' ? '/index.html' : rest;
-    let res = await env.ASSETS.fetch(new Request(new URL(assetPath, url.origin).toString(), { method: req.method }));
+    let res: Response;
+    const emb = EMBEDDED[assetPath];
+    if (emb) {
+      const bin = Uint8Array.from(atob(emb.b), (c) => c.charCodeAt(0));
+      res = new Response(req.method === 'HEAD' ? null : bin, { headers: { 'Content-Type': emb.t } });
+    } else if (env.ASSETS) {
+      res = await env.ASSETS.fetch(new Request(new URL(assetPath, url.origin).toString(), { method: req.method }));
+    } else return notFound();
     if (res.status === 404) return notFound();
     const immutable = assetPath.startsWith('/assets/');
     return withHeaders(res, { 'Cache-Control': immutable ? 'private, max-age=31536000, immutable' : 'private, no-cache' });

@@ -2,7 +2,7 @@
  * The Phase 0 source map in code. Each source knows how to read itself from HQ (read-only) and which part of the
  * snapshot it fills. See SOURCES.md for the human version.
  */
-import { NotionReader, prop } from './notion';
+import { NotionReader, prop, renderBlocks } from './notion';
 import * as P from './parsers';
 import type { Snapshot } from '../shared/schema';
 
@@ -133,7 +133,28 @@ export const SOURCES: SourceDef[] = [
       },
     };
   }),
-  page('royalty', 'C-Biz Royalty / Placement Dashboard', 'Maestro', '4178b67fa84e815db947ef2baf0e563a', 2, (md) => ({ tunesat: { rows: P.tunesatRows(md), note: 'Detected by TuneSat, not on a BMI statement yet — not income until a statement pays them.' } })),
+  // The dashboard is very large; read only the top level, then just the table under the TuneSat heading (≤ ~6 calls).
+  {
+    id: 'royalty', name: 'C-Biz Royalty / Placement Dashboard', owner: 'Maestro', kind: 'page', notionId: '4178b67fa84e815db947ef2baf0e563a',
+    read: async (r) => {
+      const page = await r.page('4178b67fa84e815db947ef2baf0e563a');
+      const top = await r.children('4178b67fa84e815db947ef2baf0e563a', 0, 0);
+      const text = (b: any) => (b[b.type]?.rich_text ?? []).map((t: any) => t.plain_text).join('');
+      const h = top.findIndex((b) => /^heading_/.test(b.type) && /tunesat/i.test(text(b)));
+      let md = '';
+      if (h >= 0) {
+        const head = top[h];
+        // Table may sit right after the heading, or inside a toggle heading.
+        const candidates = head.has_children ? await r.children(head.id, 0, 0) : top.slice(h + 1, h + 4);
+        const tbl = candidates.find((b) => b.type === 'table');
+        if (tbl) {
+          tbl.children = await r.children(tbl.id, 0, 0);
+          md = renderBlocks([{ ...head, has_children: false }, tbl]);
+        }
+      }
+      return { data: { tunesat: { rows: P.tunesatRows(md), note: 'Detected by TuneSat, not on a BMI statement yet — not income until a statement pays them.' } }, lastEdited: page.last_edited_time ?? null };
+    },
+  },
   page('synctracker', 'Sync Tracker', 'Maestro + Claude', '40a8b67fa84e817789e6e7e10e23edd1', 0, () => ({})),
   page('scout', 'Scout Trackers', 'Muse / Maestro', '4088b67fa84e81b4af51c5e44d03c171', 0, () => ({})),
 ];
@@ -158,7 +179,7 @@ export async function readCabinet(r: NotionReader, sourceMap: string[][]): Promi
     if (c.section) {
       try {
         const kids = await r.children(c.section, 0, 0);
-        const first = kids.map((b) => (b[b.type]?.rich_text ?? []).map((t: any) => t.plain_text).join('')).find((t) => t.trim().length > 20);
+        const first = kids.map((b) => (b[b.type]?.rich_text ?? []).map((t: any) => t.plain_text).join('')).find((t) => t.trim().length > 20 && !/^\s*📌|daily updates|ongoing log|^\s*start here/i.test(t));
         if (first) { role = first.trim().slice(0, 180); roleSource = `${c.name.split(' ')[0]} section page`; }
       } catch { /* keep default */ }
     }

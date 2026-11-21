@@ -6,3 +6,4 @@ console/node_modules/
 console/dist/
 console/.wrangler/
 console/screens/
+console/src/worker/assets.gen.ts
