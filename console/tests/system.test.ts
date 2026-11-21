@@ -149,7 +149,7 @@ describe('Resilience', () => {
     const r2 = new NotionReader('t', { fetchImpl: f2.fetchImpl as any, sleep: async () => {}, requestsPerSecond: 1000 });
     await refreshPass(r2, first.state, { budget: 1000, now: new Date(now.getTime() + 20 * 60 * 1000) });
     expect(f2.calls.some((c) => c.startsWith('GET /blocks/'))).toBe(false); // no page bodies re-read
-    expect(f2.calls.filter((c) => /query$/.test(c)).length).toBe(SOURCES.filter((s) => s.kind === 'database').length); // one probe each
+    expect(f2.calls.filter((c) => /query$/.test(c)).length).toBe(SOURCES.filter((s) => s.kind === 'database' && !s.discover).length); // one probe each (discovered trackers re-check every 6 h)
   });
 
   it('respects the per-visit call budget and reports pending sources', async () => {

@@ -64,10 +64,12 @@ export function parseStudioBoard(mdRaw: string, today: string) {
     }
   }
 
-  // Mixes due (skip delivered lines and the rule line)
+  // Mixes due (delivered lines become delivery records; the rule line is skipped)
+  const deliveries: { client: string; date: string | null; hours: number | null; due: string | null }[] = [];
   const mixes: Mix[] = [];
   for (const l of bullets(section(md, /^mixes due/i))) {
-    if (/^rule:/i.test(l) || /\bDELIVERED\b/.test(l)) continue;
+    if (/^rule:/i.test(l)) continue;
+    if (/\bDELIVERED\b/.test(l)) { const d = delivery(l, year); if (d) deliveries.push(d); continue; }
     const mm = /^(.+?)\s+—\s+(.+)$/.exec(l);
     if (!mm) continue;
     const due = parseLooseDate(mm[2], year);
@@ -135,7 +137,24 @@ export function parseStudioBoard(mdRaw: string, today: string) {
     const rm = /^(.+?)\s+—\s+remote mix delivered.*?\$([\d,]+)/i.exec(l);
     if (rm && !clients.some((c) => c.name === rm[1].trim())) clients.push({ name: rm[1].trim(), paidSessions: 0, lastSession: null, totalPaid: Number(rm[2].replace(/,/g, '')), rate: null, kind: 'remote', note: 'Remote mix/master' });
   }
-  return { synced, weekLine, openLine, deposits, beatSales, mixes, clients, vibe, upcoming, syncChecks };
+  for (const l of bullets(section(md, /^closed/i))) {
+    if (!/\bdelivered\b/i.test(l) || /remote mix/i.test(l)) continue;
+    const d = delivery(l, year);
+    if (!d) continue;
+    const same = deliveries.find((x) => x.client === d.client && x.date === d.date);
+    if (same) { same.due ??= d.due; same.hours ??= d.hours; } else deliveries.push(d);
+  }
+  return { synced, weekLine, openLine, deposits, beatSales, mixes, clients, vibe, upcoming, syncChecks, deliveries };
+}
+
+/** "Client — … DELIVERED Thu Nov 19, 2026 · ~2h … (was due Wed Nov 18, 2026)" → a delivery record. */
+export function delivery(l: string, year: number) {
+  const client = l.split(' — ')[0].trim();
+  const dm = /delivered\s+(?:[A-Za-z]{3}\s+)?([A-Za-z]{3,9}\.?\s+\d{1,2}(?:,?\s+\d{4})?)/i.exec(l);
+  if (!client || !dm) return null;
+  const hm = /~\s*(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?\b/i.exec(l);
+  const due = /(?:was\s+)?due\s+(?:[A-Za-z]{3}\s+)?([A-Za-z]{3,9}\.?\s+\d{1,2}(?:,?\s+\d{4})?)/i.exec(l);
+  return { client, date: parseLooseDate(dm[1], year), hours: hm ? Number(hm[1]) : null, due: due ? parseLooseDate(due[1], year) : null };
 }
 
 // ---------------- Rolling 60-Day Calendar ----------------

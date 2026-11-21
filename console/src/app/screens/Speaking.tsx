@@ -19,8 +19,21 @@ export default function Speaking() {
       <Section title="Upcoming">
         <div className="panel">
           {upcoming.length ? upcoming.map((u, i) => <div className="row" key={i}><span className="t"><strong>{u.title}</strong></span><span className="r cap">{day(u.date)}{u.time ? ` · ${u.time}` : ''}</span></div>) : <Empty>No speaking events on the calendar in the next 60 days.</Empty>}
-          <div className="banner" style={{ marginTop: 10 }}>○ <span><strong>Beacon’s speaking & funding leads: not tracked in HQ.</strong> Beacon’s pipeline lives outside HQ (referenced in the Grok Bot log), so the Dashboard can’t read it. Open the log to see what Beacon has posted.</span></div>
-          <NotionLink href="https://app.notion.com/p/4008b67fa84e811bb288e86cc67ba06d">Grok Bot log ↗</NotionLink>
+          {s.leads.found ? (
+            <>
+              <div className="label" style={{ margin: '12px 0 4px' }}>Beacon’s speaking leads</div>
+              {s.leads.rows.filter((r) => /speak/i.test(r.type)).length ? s.leads.rows.filter((r) => /speak/i.test(r.type)).sort((x, y) => (x.date ?? '9').localeCompare(y.date ?? '9')).map((r) => (
+                <div className="row" key={r.url}><span className="t"><a href={r.url} target="_blank" rel="noopener noreferrer"><strong>{r.lead}</strong></a><div className="cap">{[r.location, r.status].filter(Boolean).join(' · ')}</div></span><span className="r cap">{r.date ? day(r.date) : 'No date'}</span></div>
+              )) : <Empty>No speaking leads in Beacon’s tracker right now.</Empty>}
+              <div className="label" style={{ margin: '12px 0 4px' }}>Funding leads</div>
+              {s.leads.rows.filter((r) => /fund|grant/i.test(r.type)).length ? s.leads.rows.filter((r) => /fund|grant/i.test(r.type)).map((r) => (
+                <div className="row" key={r.url}><span className="t"><a href={r.url} target="_blank" rel="noopener noreferrer"><strong>{r.lead}</strong></a><div className="cap">{[r.location, r.status].filter(Boolean).join(' · ')}</div></span><span className="r cap">{r.date ? day(r.date) : ''}</span></div>
+              )) : <Empty>No funding leads in Beacon’s tracker right now.</Empty>}
+              <p className="cap">Live from Beacon’s Speaking & Funding Leads in HQ (view only).</p>
+            </>
+          ) : (
+            <div className="banner" style={{ marginTop: 10 }}>○ <span><strong>Beacon’s speaking & funding leads aren’t in HQ yet.</strong> They’ll appear here automatically once Beacon’s “Speaking & Funding Leads” database exists in HQ and is shared with the integration.</span></div>
+          )}
         </div>
       </Section>
       <Section title="History">

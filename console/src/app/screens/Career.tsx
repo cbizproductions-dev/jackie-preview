@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSnap, Header, Section, Empty, money, shortDay, NotionLink } from '../ui';
+import { useSnap, Header, Section, Empty, money, shortDay, NotionLink, day } from '../ui';
 import { ROOMS } from '../../shared/derive';
 import { addDays } from '../../shared/time';
 
@@ -61,10 +61,19 @@ export default function Career() {
       <Section title="Brand presence">
         <div className="grid g3">
           {BRAND.map((b) => {
+            const row = s.brand.rows.find((r) => b.match.test(r.item));
+            if (row) return (
+              <div className="panel" key={b.item}>
+                <div className="strip-row"><strong>{b.item}</strong><span className="pill gold">{row.status || 'Tracked'}</span></div>
+                {row.key && <div className="mid" style={{ fontSize: 18 }}>{row.key}</div>}
+                <div className="cap">{row.lastChecked ? `Checked ${day(row.lastChecked)}` : 'Not checked yet'} · <a href={row.url} target="_blank" rel="noopener noreferrer">Brand Presence ↗</a>{row.link ? <> · <a href={row.link} target="_blank" rel="noopener noreferrer">Open</a></> : null}</div>
+              </div>
+            );
             const tracked = b.match.test(inMotion) || b.match.test(s.career.verifiedCredits.join(' '));
             return <div className="panel" key={b.item}><div className="strip-row"><strong>{b.item}</strong><span className={`pill ${tracked ? 'gold' : ''}`}>{tracked ? 'In HQ' : 'Not tracked in HQ'}</span></div><div className="cap">{tracked ? b.note || 'Tracked in the Milestones room' : 'No status recorded in HQ.'}</div></div>;
           })}
         </div>
+        <p className="cap">{s.brand.found ? 'Live from Brandon’s Brand Presence tracker in HQ.' : 'Brandon’s Brand Presence tracker isn’t in HQ yet; it appears here automatically once it exists and is shared with the integration.'}</p>
       </Section>
 
       <Section title="Photos">

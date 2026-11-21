@@ -230,6 +230,7 @@ export const Snapshot = z.object({
     upcoming: z.array(z.object({ who: z.string(), date: z.string(), note: z.string() })),
     syncChecks: z.array(z.object({ date: z.string().nullable(), company: z.string(), amount: z.number() })),
     beatSales: z.array(z.object({ buyer: z.string(), date: z.string().nullable(), amount: z.number(), items: z.number() })),
+    deliveries: z.array(z.object({ client: z.string(), date: z.string().nullable(), hours: z.number().nullable(), due: z.string().nullable() })).default([]),
   }),
   calendar: z.object({ refreshed: z.string().nullable(), lastVerified: z.string().nullable(), days: z.array(CalDay) }),
   briefs: z.array(Brief),
@@ -242,6 +243,10 @@ export const Snapshot = z.object({
   system: z.object({ dictionary: z.array(z.array(z.string())), rules: z.array(z.string()), limitations: z.array(z.string()) }),
   career: z.object({ figures: z.array(z.array(z.string())), timeline: z.array(z.array(z.string())), verifiedCredits: z.array(z.string()), reportedCredits: z.array(z.string()), inMotion: z.array(z.string()) }),
   futures: z.array(z.object({ name: z.string(), body: z.string() })),
+  /** Brandon's "Brand Presence" database, if it exists in HQ (found by title). */
+  brand: z.object({ found: z.boolean(), url: z.string(), rows: z.array(z.object({ item: z.string(), status: z.string(), key: z.string(), link: z.string(), lastChecked: z.string().nullable(), url: z.string() })) }).default({ found: false, url: '', rows: [] }),
+  /** Beacon's "Speaking & Funding Leads" database, if it exists in HQ (found by title). */
+  leads: z.object({ found: z.boolean(), url: z.string(), rows: z.array(z.object({ lead: z.string(), type: z.string(), date: z.string().nullable(), location: z.string(), status: z.string(), link: z.string(), url: z.string() })) }).default({ found: false, url: '', rows: [] }),
   /** Screen-print header art (traced from Kris's own photos), read from the runbook page. */
   art: z.record(z.object({ w: z.number(), h: z.number(), paths: z.string() })).default({}),
   cc: CommandCenterData,

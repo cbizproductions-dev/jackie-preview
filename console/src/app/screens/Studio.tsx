@@ -87,6 +87,28 @@ export default function Studio() {
         </Section>
       </div>
 
+      <Section title="Mix delivery record">
+        <div className="panel">
+          {(() => {
+            const d = s.studio.deliveries;
+            const timed = d.filter((x) => x.due && x.date);
+            const onTime = timed.filter((x) => x.date! <= x.due!).length;
+            const hrs = d.filter((x) => x.hours != null);
+            const mixHours = hrs.reduce((a, x) => a + (x.hours ?? 0), 0);
+            const sessionRev = ops.sessionRevenue ?? 0, sessionHrs = ops.hours ?? 0;
+            return d.length ? (
+              <>
+                <div className="row"><span className="t">Deliveries on record</span><span className="r num">{d.length}</span></div>
+                <div className="row"><span className="t">On time (due date known)</span><span className="r num">{timed.length ? `${onTime} of ${timed.length}` : 'Not on file'}</span></div>
+                <div className="row"><span className="t">Mix hours logged</span><span className="r num">{hrs.length ? `${mixHours} hrs · ${hrs.length} mix${hrs.length === 1 ? '' : 'es'}` : 'Not on file yet'}</span></div>
+                {hrs.length > 0 && sessionHrs > 0 && <div className="row"><span className="t">$/hr incl. logged mix time</span><span className="r num">${(sessionRev / (sessionHrs + mixHours)).toFixed(2)}/hr</span></div>}
+                <p className="cap">From the Studio Board (Muse). Mix hours come from you when you tell Muse a mix is done; until most mixes carry hours, the $/hr figure undercounts mix time.</p>
+              </>
+            ) : <Empty>No delivered mixes recorded on the Studio Board yet.</Empty>;
+          })()}
+        </div>
+      </Section>
+
       <Section title="Operating metrics">
         <div className="grid g3">
           <div className="panel"><div className="label">Avg paid session</div><div className="mid">{money(ops.avgSession)}</div><div className="cap">{money(ops.sessionRevenue)} ÷ {ops.paidSessions ?? '—'} sessions</div></div>

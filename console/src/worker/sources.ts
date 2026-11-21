@@ -7,6 +7,8 @@ import * as P from './parsers';
 import type { Snapshot } from '../shared/schema';
 
 export type SourceDef = {
+  /** Found by title at runtime (a database another member creates later). */
+  discover?: boolean;
   id: string;
   name: string;
   owner: string;
@@ -100,7 +102,7 @@ export const SOURCES: SourceDef[] = [
   db('leases', 'Beat Leases & Registrations', 'Maestro', '058a6cd1bf004ec88c9b3204f9050837', (rows) => ({ leases: { rows: rows.length } })),
   page('studio', 'Studio Board — Muse mirror', 'Muse', '4118b67fa84e815d87f9da794bb520d8', 2, (md, today) => {
     const sb = P.parseStudioBoard(md, today);
-    return { studio: { synced: sb.synced, mixes: sb.mixes, clients: sb.clients, vibe: sb.vibe, deposits: sb.deposits, upcoming: sb.upcoming, syncChecks: sb.syncChecks, beatSales: sb.beatSales }, _weekLine: sb.weekLine, _openLine: sb.openLine };
+    return { studio: { synced: sb.synced, mixes: sb.mixes, clients: sb.clients, vibe: sb.vibe, deposits: sb.deposits, upcoming: sb.upcoming, syncChecks: sb.syncChecks, beatSales: sb.beatSales, deliveries: sb.deliveries }, _weekLine: sb.weekLine, _openLine: sb.openLine };
   }),
   page('calendar', 'Rolling 60-Day Calendar', 'Muse', '4178b67fa84e81d5a551c62aa4d62c46', 1, (md) => ({ calendar: P.parseCalendar(md) })),
   page('cash', 'Cash Flow Radar', 'Claude', '41e8b67fa84e818283ffdb9b4b8af4e4', 1, (md) => ({ cashMoves: P.todos(md, /money moves/i) })),
@@ -159,7 +161,7 @@ export const SOURCES: SourceDef[] = [
           md = renderBlocks([{ ...head, has_children: false }, tbl]);
         }
       }
-      return { data: { tunesat: { rows: P.tunesatRows(md), note: 'Detected by TuneSat, not on a BMI statement yet — not income until a statement pays them.' } }, lastEdited: page.last_edited_time ?? null };
+      return { data: { tunesat: { rows: P.tunesatRows(md), note: 'Detected by TuneSat, not on a BMI statement yet. Not income until a statement pays them — and some may be buyouts or deals with no back end, so not every detection will pay.' } }, lastEdited: page.last_edited_time ?? null };
     },
   },
   page('synctracker', 'Sync Tracker', 'Maestro + Claude', '40a8b67fa84e817789e6e7e10e23edd1', 0, () => ({})),
@@ -167,6 +169,40 @@ export const SOURCES: SourceDef[] = [
 ];
 
 /** Cabinet members who touch music. Roles are read from each member's own HQ section page at runtime. */
+const textOf = (p: any): string => {
+  if (!p) return '';
+  if (p.title || p.rich_text) return prop.text(p);
+  if (p.select || p.status) return prop.select(p) ?? '';
+  if (p.url) return p.url;
+  if (typeof p.number === 'number') return String(p.number);
+  if (p.date) return p.date.start ?? '';
+  if (p.multi_select) return prop.multi(p).join(', ');
+  return '';
+};
+const pick = (props: any, ...names: string[]) => {
+  const k = Object.keys(props ?? {}).find((n) => names.some((w) => n.trim().toLowerCase() === w.toLowerCase()));
+  return k ? props[k] : undefined;
+};
+const discovered = (id: string, name: string, owner: string, title: string, key: 'brand' | 'leads', map: (props: any, row: any) => any): SourceDef => ({
+  id, name, owner, kind: 'database', notionId: '', discover: true,
+  read: async (r) => {
+    const ds = await r.findDataSource(title);
+    if (!ds) return { data: { [key]: { found: false, url: '', rows: [] } } as any, lastEdited: null };
+    const rows = await r.rowsOfDataSource(ds.id);
+    return { data: { [key]: { found: true, url: ds.url, rows: rows.map((x) => map(P_(x), x)) } } as any, lastEdited: ds.lastEdited };
+  },
+});
+SOURCES.push(
+  discovered('brand', 'Brand Presence (Brandon)', 'Brandon (Council)', 'Brand Presence', 'brand', (p, x) => ({
+    item: textOf(pick(p, 'Item', 'Name')), status: textOf(pick(p, 'Status')), key: textOf(pick(p, 'Key number', 'Key Number', 'Number')),
+    link: textOf(pick(p, 'Link', 'URL')), lastChecked: prop.date(pick(p, 'Last checked', 'Last Checked')), url: url(x.id),
+  })),
+  discovered('leads', 'Speaking & Funding Leads (Beacon)', 'Beacon (Council)', 'Speaking & Funding Leads', 'leads', (p, x) => ({
+    lead: textOf(pick(p, 'Lead', 'Name')), type: textOf(pick(p, 'Type')), date: prop.date(pick(p, 'Date')), location: textOf(pick(p, 'Location')),
+    status: textOf(pick(p, 'Status')), link: textOf(pick(p, 'Link', 'URL')), url: url(x.id),
+  })),
+);
+
 export const CABINET = [
   { name: 'Claude', logName: 'Claude Daily Updates', log: '4008b67fa84e8131be8fc031b01df058', section: '3fe8b67fa84e8108a731db641473c228', match: /claude/i },
   { name: 'Muse', logName: 'MUSE — Daily Updates', log: '4008b67fa84e813fb439ca1ae2f45a44', section: '3fe8b67fa84e812c9954dfdfd9a434d0', match: /muse/i },

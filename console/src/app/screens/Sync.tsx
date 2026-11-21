@@ -118,7 +118,7 @@ export default function Sync() {
           <div className="panel">
             {s.tunesat.rows.length ? s.tunesat.rows.map((r, i) => <div className="row" key={i}><span className="t"><strong>{r.title}</strong><div className="cap">{r.show}</div></span><span className="r cap">{r.detail}</span></div>)
               : upside ? <><div className="mid" style={{ fontSize: 18 }}>{upside[2].split('.')[0]}</div><div className="cap">Itemized list: open the Royalty Dashboard.</div></> : <Empty>No TuneSat detections on file.</Empty>}
-            <p className="cap">Detected on TV but not paid. Not income until a BMI statement pays them. Expected timing: {upside?.[0] ?? '—'}{nextBmi ? ` · next statement ${nextBmi[0]}` : ''}.</p>
+            <p className="cap">Detected on TV but not paid. Not income until a BMI statement pays them, and some may be buyouts or no-back-end deals that never will. Expected timing: {upside?.[0] ?? '—'}{nextBmi ? ` · next statement ${nextBmi[0]}` : ''}.</p>
             <NotionLink href={ROOMS.royalty} />
           </div>
         </Section>

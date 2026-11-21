@@ -48,6 +48,17 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
     if (!s.data || s.fromSeed) s.needsRead = true;
     const fresh = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < STALE_AFTER_MS && !opts.force && !s.needsRead;
     if (reader.calls >= opts.budget - 2) { if (!fresh || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
+    if (def.discover) {
+      const recent = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < 6 * 3600 * 1000 && s.data && !s.fromSeed;
+      if (!recent && reader.calls < opts.budget * 0.7) {
+        try {
+          const r = await def.read(reader, today);
+          s.data = r.data; s.lastEdited = r.lastEdited; s.readAt = nowIso; s.checkedAt = nowIso; s.error = null; s.needsRead = false; s.fromSeed = false;
+        } catch (e) { s.error = String((e as Error).message ?? e).slice(0, 200); s.checkedAt = null; }
+      }
+      state.sources[def.id] = s;
+      continue;
+    }
     try {
       if (!fresh) {
         let lastEdited: string | null;
@@ -89,11 +100,11 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
 
 const EMPTY: Omit<Snapshot, 'generatedAt' | 'today' | 'mode' | 'state' | 'failed' | 'sources' | 'issues'> = {
   schemaVersion: 1, weeks: [], ledger: [], bmi: [], goals: [], insights: [], maintenance: [], photos: [],
-  studio: { synced: null, mixes: [], clients: [], vibe: [], deposits: [], upcoming: [], syncChecks: [], beatSales: [] },
+  studio: { synced: null, mixes: [], clients: [], vibe: [], deposits: [], upcoming: [], syncChecks: [], beatSales: [], deliveries: [] },
   calendar: { refreshed: null, lastVerified: null, days: [] }, briefs: [], contracts: [], leases: { rows: null },
   cashMoves: [], experimentTodos: [], members: [], tunesat: { rows: [], note: '' },
   system: { dictionary: [], rules: [], limitations: [] },
-  career: { figures: [], timeline: [], verifiedCredits: [], reportedCredits: [], inMotion: [] }, futures: [], cc: {}, art: {},
+  career: { figures: [], timeline: [], verifiedCredits: [], reportedCredits: [], inMotion: [] }, futures: [], cc: {}, art: {}, brand: { found: false, url: '', rows: [] }, leads: { found: false, url: '', rows: [] },
 };
 
 export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): Snapshot {
@@ -114,11 +125,12 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     }
     let state: SourceState['state'] = 'fresh';
     let note = '';
-    if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; failed.push(def.name); }
+    if (def.discover && (!s?.data || !(Object.values(s.data)[0] as any)?.found)) { state = 'not_connected'; note = s?.error ? explainError(s.error) : 'Not in HQ yet (or not shared with the integration)'; }
+    else if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; failed.push(def.name); }
     else if (s.fromSeed && !s.error) { state = 'stale'; note = 'Showing the build-time capture until the first live read'; failed.push(def.name); }
     else if (s.error) { state = 'failed'; note = `${explainError(s.error)} — ${s.data ? `showing last good data${s.readAt ? ` from ${s.readAt.slice(0, 10)}` : ''}` : 'no data yet'}`; failed.push(def.name); }
     if (def.id === 'studio' && s?.data) state = state === 'failed' ? state : freshnessOf(s.lastEdited, nowIso);
-    sources.push({ id: def.id, name: def.name, owner: def.owner, kind: def.kind, url: `https://app.notion.com/p/${def.notionId}`, lastEdited: s?.lastEdited ?? null, readAt: s?.readAt ?? null, state, note });
+    sources.push({ id: def.id, name: def.name, owner: def.owner, kind: def.kind, url: def.discover ? ((Object.values(s?.data ?? {})[0] as any)?.url || 'https://app.notion.com/p/1488b67fa84e80f69ff0c33b8ecc1b94') : `https://app.notion.com/p/${def.notionId}`, lastEdited: s?.lastEdited ?? null, readAt: s?.readAt ?? null, state, note });
   }
   // Calendar freshness uses its own "Last verified" line, not just the page edit time.
   const cal = sources.find((x) => x.id === 'calendar');

@@ -24,7 +24,7 @@ export class NotionReader {
 
   /** Throttled request with retry on 429/5xx (Retry-After honoured, exponential backoff otherwise). */
   private async req(method: 'GET' | 'POST', path: string, body?: unknown): Promise<any> {
-    if (method === 'POST' && !/^\/data_sources\/[\w-]+\/query$/.test(path)) throw new Error('Read-only client: POST allowed only for data source queries');
+    if (method === 'POST' && !/^\/data_sources\/[\w-]+\/query$/.test(path) && path !== '/search') throw new Error('Read-only client: POST allowed only for data source queries and search');
     for (let attempt = 0; attempt < 5; attempt++) {
       const wait = this.last + this.gapMs - Date.now();
       if (wait > 0) await this.sleep(wait);
@@ -53,6 +53,23 @@ export class NotionReader {
     return this.req('GET', `/databases/${id}`);
   }
   /** All rows of a database's first data source. */
+  /** Find a data source shared with the integration by its exact title (case-insensitive). Read-only. */
+  async findDataSource(title: string): Promise<{ id: string; url: string; lastEdited: string | null } | null> {
+    const r = await this.req('POST', '/search', { query: title, filter: { property: 'object', value: 'data_source' }, page_size: 10 });
+    const want = title.trim().toLowerCase();
+    const hit = (r.results ?? []).find((d: any) => (d.title ?? []).map((t: any) => t.plain_text).join('').trim().toLowerCase() === want && !d.archived && !d.in_trash);
+    return hit ? { id: hit.id, url: hit.url ?? '', lastEdited: hit.last_edited_time ?? null } : null;
+  }
+  async rowsOfDataSource(ds: string): Promise<any[]> {
+    const rows: any[] = [];
+    let cursor: string | undefined;
+    do {
+      const r = await this.req('POST', `/data_sources/${ds}/query`, { page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) });
+      rows.push(...r.results);
+      cursor = r.has_more ? r.next_cursor : undefined;
+    } while (cursor);
+    return rows;
+  }
   async rows(databaseId: string): Promise<{ rows: any[]; lastEdited: string | null }> {
     const db = await this.database(databaseId);
     const ds = db.data_sources?.[0]?.id;
