@@ -5,7 +5,7 @@
   --raised: #1e2125;
   --well: #0b0c0e;
   --hair: #2a2e33;
-  --hair-2: #3a3f46; /* UI boundary ≥3:1 vs panel for focus/controls */
+  --hair-2: #646a73; /* UI boundary ≥3:1 vs panel for focus/controls */
   --ink: #eceae4; /* 15.6:1 on panel */
   --ink-2: #a7a39a; /* 7.2:1 on panel */
   --ink-3: #8c887f; /* 5.2:1 on panel — captions */
@@ -134,7 +134,7 @@ button { font: inherit; color: inherit; }
 .ladder i.on { background: var(--seg, var(--ok)); box-shadow: 0 0 5px color-mix(in srgb, var(--seg, var(--ok)) 55%, transparent); }
 .ladder .tick { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--gold-hi); }
 .ladder .tick.dash { border-left: 2px dashed var(--gold); }
-.ticklabels { position: relative; height: 14px; font: 500 11px/14px var(--font-num); color: var(--ink-3); }
+.ticklabels { position: relative; height: 15px; font: 500 12px/15px var(--font-num); color: var(--ink-3); }
 .ticklabels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 
 /* LEDs (health) */
@@ -147,8 +147,8 @@ button { font: inherit; color: inherit; }
 .led.amber { color: var(--warn); text-shadow: 0 0 8px rgba(242, 177, 52, .55); }
 .led.red { color: var(--bad); text-shadow: 0 0 8px rgba(255, 95, 87, .6); }
 .led.none { color: var(--none); }
-.led-name { font: 600 11px/1.1 var(--font-label); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); text-align: center; }
-.led-word { font: 600 11px/1 var(--font-label); letter-spacing: .1em; text-transform: uppercase; }
+.led-name { font: 600 12px/1.1 var(--font-label); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); text-align: center; }
+.led-word { font: 600 12px/1 var(--font-label); letter-spacing: .1em; text-transform: uppercase; }
 
 /* moves */
 .moves { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -172,7 +172,7 @@ details.fold > summary { display: flex; align-items: center; justify-content: sp
 details.fold > summary::-webkit-details-marker { display: none; }
 details.fold > summary::after { content: '+'; font: 500 18px/1 var(--font-num); color: var(--gold); }
 details.fold[open] > summary::after { content: '−'; }
-details.math > summary { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; color: var(--gold-hi); font-size: 13px; }
+details.math > summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--gold-hi); font-size: 13px; }
 details.math .well { font: 13px/1.5 var(--font-num); color: var(--ink-2); margin-top: 6px; white-space: pre-wrap; }
 
 /* charts */

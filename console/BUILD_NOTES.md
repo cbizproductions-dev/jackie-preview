@@ -5,10 +5,26 @@ Running log so another Claude session can pick up. Newest first within each sect
 ## Status
 - [x] Phase 0 — HQ mapped (see SOURCES.md). Cross-checks against Gmail done (see "Discrepancies").
 - [x] Phase 1 — Worker, read-only Notion client, snapshot builder, KV caching, Zod schema, tests (rules, health, access, resilience).
-- [ ] Phase 2 — design system + components
-- [ ] Phase 3 — screens
-- [ ] Phase 4 — deploy + Notion page (needs Kris: Cloudflare token + Notion integration + page approval)
-- [ ] Phase 5 — QA checklist
+- [x] Phase 2 — design system + components (tokens in `src/app/styles/app.css`, components in `src/app/ui.tsx`)
+- [x] Phase 3 — all 12 screens (`src/app/screens/`)
+- [ ] Phase 4 — deploy + Notion page. **Blocked on Kris**: Cloudflare token (cbizproductions@gmail.com account), Notion read-only integration token, page approval.
+- [~] Phase 5 — QA: everything runnable here passes (see below); Notion-embed and iPhone checks need the deployed URL.
+
+## QA done in this session (Nov 21)
+- 57 unit tests pass: every counting rule, every metric-dictionary formula, health thresholds, access model (404 without key, no write methods), read-only guard, 429 backoff, failed source keeps last good data + Partial, unchanged sources not re-read, call budget, Durango hold.
+- Real-data check (`fixtures/local.test.ts`, local only): parsers reproduce the Command Center's mix queue, vibe conversion, concentration and this-week figures exactly.
+- Local `wrangler dev`: every path without the key → 404; POST → 404; `/c/<key>` → 308 to `/c/<key>/`; noindex, CSP frame-ancestors, no-referrer present; no X-Frame-Options.
+- Bundle: 85 KB gzipped main JS (+ ~3 KB per lazy screen); fonts self-hosted; no third-party hosts except Instagram embeds; no secrets in `dist/` or git history.
+- Throttled 4G + 4× CPU, local Worker: first contentful paint ~0.57 s, meters with data ~1.1 s.
+- Playwright screenshots of all 12 screens at 390×844, 430×932, 1440×900, plus 650 px embed at 390 and 1440: no horizontal overflow, no console errors; tap targets ≥44 px; text ≥12 px (body 15 px).
+- Contrast: text ≥4.5:1 (lowest: captions 5.0:1), status glyphs and control outlines ≥3:1. Lane palette re-stepped to pass CVD separation (validator, all pairs ΔE ≥ 8).
+- Embed (650 px, phone): meter bridge + Today's Moves header + first move visible.
+
+## Still to verify after deploy
+- Real Notion embed on desktop and in the Notion iPhone app (which frame origin Notion uses; adjust `FRAME_ANCESTORS` in `src/worker/index.ts` if needed).
+- "Open full screen ↗" from inside the iPhone embed; Add to Home Screen.
+- First live refresh against Notion (call budget, parser fit on the live block structure — especially Studio Board bullets and the runbook code block).
+
 
 ## Decisions
 - **No business data in git.** The repo (`cbizproductions-dev/jackie-preview`) is public. Kris chose (Nov 21) to keep data out:

@@ -125,7 +125,7 @@ export default function Home() {
             <div className="row"><span className="t">Snapshot</span><span className="r num">{labelTime(s.generatedAt)}</span></div>
             <div className="row"><span className="t">State</span><span className="r"><SourceBadge snap={s} /></span></div>
             <div className="row"><span className="t">Stale or failed sources</span><span className="r">{s.sources.filter((x) => x.state === 'stale' || x.state === 'failed').map((x) => x.name).join(', ') || 'None'}</span></div>
-            <div className="row"><span className="t">Open data issues</span><a className="r" href="#/cabinet">{s.issues.length} ›</a></div>
+            <div className="row"><span className="t">Open data issues</span><a className="r link-sm" style={{ justifyContent: "flex-end" }} href="#/cabinet">{s.issues.length} ›</a></div>
           </div>
         </Section>
       </div>
