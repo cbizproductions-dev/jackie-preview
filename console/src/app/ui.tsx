@@ -47,7 +47,7 @@ export function Header({ kicker, title, sources, notion, art = 'couch' }: { kick
   const a = ART[art];
   return (
     <header className="hdr">
-      {a && <svg className="art" viewBox={`0 0 ${a.w} ${a.h}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: a.paths }} />}
+      {a && <svg className="art" viewBox={`0 0 ${a.w} ${a.h}`} preserveAspectRatio="xMaxYMax meet" aria-hidden="true" dangerouslySetInnerHTML={{ __html: a.paths }} />}
       <div className="hdr-text">
         <div className="kicker">{kicker}</div>
         <h1>{title}</h1>
