@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <>
-      <Header kicker="C-BIZ OFFICIAL · Music business" title="The Console" sources="Weekly Scorecard, Income Ledger, Goals, Studio Board, Intelligence Feed" notion={ROOMS.home} />
+      <Header kicker="C-BIZ OFFICIAL · Music business" title="Dashboard" sources="Weekly Scorecard, Income Ledger, Goals, Studio Board, Intelligence Feed" notion={ROOMS.home} />
       <div className="bridge" role="group" aria-label="Meter bridge">
         <button className="meter wide" onClick={go('money')} aria-label={`This week: ${money(wk.value)} of $${t.goal} goal${inProg ? ', in progress' : ''}. Open Money.`}>
           <span className="label">This week · {wk.period}</span>

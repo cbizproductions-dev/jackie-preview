@@ -17,7 +17,7 @@ export default function System() {
           <div className="row"><span className="t">Snapshot</span><span className="r num">{labelTime(s.generatedAt)}</span></div>
           <div className="row"><span className="t">State</span><span className="r"><SourceBadge snap={s} /></span></div>
           <div className="row"><span className="t">Notion API version</span><span className="r num">{NOTION_VERSION}</span></div>
-          <p className="cap">View only. The Console never writes to Notion, email, Instagram or anywhere else. Every item links to its source in Notion.</p>
+          <p className="cap">View only. The Dashboard never writes to Notion, email, Instagram or anywhere else. Every item links to its source in Notion.</p>
         </div>
       </Section>
       <Section title="Counting rules">
@@ -32,8 +32,8 @@ export default function System() {
         <div className="panel">
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {s.system.limitations.map((r) => <li key={r} className="sub" style={{ marginBottom: 6 }}>{r}</li>)}
-            <li className="sub">Console: scouting, outreach and brief totals come from the Command Center’s daily data.json, so they refresh once a day, not live.</li>
-            <li className="sub">Console: Beacon’s speaking leads and most brand items aren’t tracked in HQ, so they show “Not tracked in HQ”.</li>
+            <li className="sub">Dashboard: scouting, outreach and brief totals come from the Command Center’s daily data.json, so they refresh once a day, not live.</li>
+            <li className="sub">Dashboard: Beacon’s speaking leads and most brand items aren’t tracked in HQ, so they show “Not tracked in HQ”.</li>
           </ul>
         </div>
       </Section>

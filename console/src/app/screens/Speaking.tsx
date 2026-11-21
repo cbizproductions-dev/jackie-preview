@@ -19,7 +19,7 @@ export default function Speaking() {
       <Section title="Upcoming">
         <div className="panel">
           {upcoming.length ? upcoming.map((u, i) => <div className="row" key={i}><span className="t"><strong>{u.title}</strong></span><span className="r cap">{day(u.date)}{u.time ? ` · ${u.time}` : ''}</span></div>) : <Empty>No speaking events on the calendar in the next 60 days.</Empty>}
-          <div className="banner" style={{ marginTop: 10 }}>○ <span><strong>Beacon’s speaking & funding leads: not tracked in HQ.</strong> Beacon’s pipeline lives outside HQ (referenced in the Grok Bot log), so the Console can’t read it. Open the log to see what Beacon has posted.</span></div>
+          <div className="banner" style={{ marginTop: 10 }}>○ <span><strong>Beacon’s speaking & funding leads: not tracked in HQ.</strong> Beacon’s pipeline lives outside HQ (referenced in the Grok Bot log), so the Dashboard can’t read it. Open the log to see what Beacon has posted.</span></div>
           <NotionLink href="https://app.notion.com/p/4008b67fa84e811bb288e86cc67ba06d">Grok Bot log ↗</NotionLink>
         </div>
       </Section>

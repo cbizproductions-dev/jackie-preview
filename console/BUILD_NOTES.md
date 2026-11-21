@@ -1,4 +1,4 @@
-# BUILD_NOTES — C-BIZ Console (test build)
+# BUILD_NOTES — C-BIZ OFFICIAL DASHBOARD (test build; repo folder and Worker are still named "console")
 
 Running log so another Claude session can pick up. Newest first within each section.
 
@@ -8,7 +8,7 @@ Running log so another Claude session can pick up. Newest first within each sect
 - [x] Phase 2 — design system + components (tokens in `src/app/styles/app.css`, components in `src/app/ui.tsx`)
 - [x] Phase 3 — all 12 screens (`src/app/screens/`)
 - [x] Phase 4a — deployed to Kris's Cloudflare (cbizproductions@gmail.com): `cbiz-console.localsite-studio.workers.dev`, KV `SNAP`, secrets ACCESS_KEY + NOTION_TOKEN (set by Kris). **All 21 sources read live** as of Nov 21 ~2:09 PM ET; headline numbers and all ten lights match the Command Center.
-- [ ] Phase 4b — Notion page "🎛️ C-BIZ Console (test)" + one log line: waiting for Kris's OK.
+- [x] Phase 4b — renamed to **C-BIZ OFFICIAL DASHBOARD** (Kris, Nov 21; the Worker/URL and repo folder keep the name `console`). Notion page "🎛️ C-BIZ OFFICIAL DASHBOARD (test)" created under the Command Center (embed + Open full screen + one line) and one line added to Claude Daily Updates. Nothing else in HQ was changed.
 
 ## Deploy notes (Nov 21)
 - This sandbox's proxy injects the Cloudflare token into every api.cloudflare.com request, which breaks wrangler's static-asset upload (it needs its own upload JWT). So the built app is **embedded in the Worker** (`scripts/embed-assets.mjs` → `src/worker/assets.gen.ts`, git-ignored) and served by the Worker; `npm run deploy` does build → embed → deploy. `keep_vars = true` protects dashboard-set values.

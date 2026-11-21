@@ -24,7 +24,7 @@ export default function Cabinet() {
               <span className="r"><div className="num" style={{ fontSize: 13 }}>{ago(m.lastActive, s.generatedAt)}</div><a className="link-sm" href={m.logUrl} target="_blank" rel="noopener noreferrer">{m.logName} ↗</a></span>
             </div>
           )) : <Empty>Cabinet logs haven’t been read yet.</Empty>}
-          <p className="cap">Last activity = the log page’s last edited time. The Console doesn’t summarize anyone’s log — tap through to read it.</p>
+          <p className="cap">Last activity = the log page’s last edited time. The Dashboard doesn’t summarize anyone’s log — tap through to read it.</p>
         </div>
       </Section>
 
@@ -55,7 +55,7 @@ export default function Cabinet() {
         <div className="panel">
           {s.issues.length ? s.issues.map((i, k) => (
             <div className="row" key={k} style={{ gridTemplateColumns: '1fr' }}>
-              <span className="t"><span className="pill warn">▲ Data issue</span> <strong>{i.title}</strong><div className="sub">{i.detail}</div><div className="cap">Sources: {i.sources.join(' vs ')} · {i.origin === 'console' ? 'found by the Console' : 'Intelligence Feed'}{i.url ? <> · <a href={i.url} target="_blank" rel="noopener noreferrer">Open ↗</a></> : null}</div></span>
+              <span className="t"><span className="pill warn">▲ Data issue</span> <strong>{i.title}</strong><div className="sub">{i.detail}</div><div className="cap">Sources: {i.sources.join(' vs ')} · {i.origin === 'console' ? 'found by the Dashboard' : 'Intelligence Feed'}{i.url ? <> · <a href={i.url} target="_blank" rel="noopener noreferrer">Open ↗</a></> : null}</div></span>
             </div>
           )) : <Empty>No open data issues.</Empty>}
           <p className="cap">Conflicts are shown, never resolved here. Kris’s word beats any agent’s record; on studio conflicts, Kris’s word beats Maestro’s. Snapshot {labelTime(s.generatedAt)}.</p>

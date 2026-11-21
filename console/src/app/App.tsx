@@ -103,13 +103,13 @@ export default function App() {
     <SnapCtx.Provider value={snap}>
       {embedded && (
         <div className="embedbar">
-          <span className="brand">C-BIZ Console</span>
+          <span className="brand">C-BIZ Official Dashboard</span>
           <a href={location.href} target="_blank" rel="noopener">Open full screen ↗</a>
         </div>
       )}
       <div className={`shell${embedded ? ' embedded' : ''}`}>
         <nav className="rail" aria-label="Screens">
-          <div className="brand">C-BIZ<br />Console</div>
+          <div className="brand">C-BIZ<br />Official<br />Dashboard</div>
           {SCREENS.map((s) => link(s.id, s.name))}
         </nav>
         <main className="main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>

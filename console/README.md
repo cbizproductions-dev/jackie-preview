@@ -1,4 +1,4 @@
-# C-BIZ Console
+# C-BIZ OFFICIAL DASHBOARD
 
 A single-page, studio-console-style dashboard for the C-BIZ OFFICIAL music business. It reads the
 Cabinet's Notion workspace (HQ) through a **read-only** Notion integration and shows every lane at a glance:
