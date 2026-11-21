@@ -1,0 +1,8 @@
+# C-BIZ Console: never commit business data or secrets
+console/fixtures/
+console/seed/
+console/.dev.vars
+console/node_modules/
+console/dist/
+console/.wrangler/
+console/screens/
