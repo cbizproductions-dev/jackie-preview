@@ -113,9 +113,14 @@ export default function Home() {
           <div className="panel">
             {next ? (
               <>
-                <div className="label">{day(next.date)}{next.time ? ` · ${next.time}` : ''}</div>
-                <div className="mid" style={{ fontSize: 19, marginTop: 4 }}>{next.title}</div>
-                <div className="cap" style={{ marginTop: 4 }}>From the Rolling 60-Day Calendar (Muse)</div>
+                <div className="label">{day(next.date)}</div>
+                {next.items.map((it, i) => (
+                  <div key={i} style={{ marginTop: i ? 10 : 4 }}>
+                    {it.time && <div className="cap">{it.time}</div>}
+                    <div className="mid" style={{ fontSize: 19 }}>{it.title}</div>
+                  </div>
+                ))}
+                <div className="cap" style={{ marginTop: 6 }}>From the Rolling 60-Day Calendar (Muse)</div>
               </>
             ) : <Empty>No session or music event on the calendar in the next 60 days.</Empty>}
           </div>
@@ -138,9 +143,10 @@ function nextUp(s: ReturnType<typeof useSnap>) {
   for (const d of s.calendar.days) {
     if (d.date < s.today) continue;
     const it = d.items.find((i) => i.tags.some((t) => ['session', 'vibe', 'sync', 'speaking', 'brief'].includes(t)));
-    if (it) return { date: d.date, time: it.time, title: it.title.replace(/\s*\(user-reported.*\)/i, '') };
+    // Show every entry on that day, not just the first music item.
+    if (it) return { date: d.date, items: d.items.map((i) => ({ time: i.time, title: i.title.replace(/\s*\(user-reported.*\)/i, '') })) };
   }
   const u = s.studio.upcoming[0];
-  return u ? { date: u.date, time: null, title: `${u.who} — booked session` } : null;
+  return u ? { date: u.date, items: [{ time: null as string | null, title: `${u.who} — booked session` }] } : null;
 }
 export { labelDay };
