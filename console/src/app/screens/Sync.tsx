@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, money, moneyAuto, pct, signedPct, Empty, HBars, NotionLink, shortDay, useTip, useWidth } from '../ui';
+import { CCRoom } from '../cc';
 import { ROOMS, bmiSummary, catalogNumbers } from '../../shared/derive';
 import { quarterKey, syncReplyRate, briefConversion, round2 } from '../../shared/rules';
 
@@ -45,6 +46,7 @@ export default function Sync() {
   return (
     <>
       <Header kicker="Brief Board · Royalty Dashboard · Sync Tracker" title="Sync & Royalties" sources="Brief Board (Maestro), BMI Statements, Intelligence Feed, Command Center data.json" notion={ROOMS.sync} art="la" />
+      <CCRoom room="sync" />
 
       {working && working.rows?.length > 0 && (
         <Section title="Working on now">

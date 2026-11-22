@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSnap, money, pct, signedPct, Ladder, Spark, Led, Section, Count, labelTime, day, SourceBadge, Empty, lightWord, Header } from '../ui';
+import { CCHeadline, CCBrief, CCFacts } from '../cc';
 import { goalTargets, thisWeekMetric, yearMetrics, todaysMoves, healthLights, ROOMS, studioOps, monthMetrics, currentWeek } from '../../shared/derive';
 import { momentum, weekCash, weekStatus } from '../../shared/rules';
 import { labelDay, addDays, weekStart } from '../../shared/time';
@@ -65,6 +66,7 @@ export default function Home() {
           </span>
         </button>
       </div>
+      <CCHeadline />
 
       <Section title="Today’s moves" right={<span className="cap">Overdue · money · deadlines</span>}>
         {moves.length ? (
@@ -84,6 +86,8 @@ export default function Home() {
           </ol>
         ) : <Empty>Nothing overdue, owed or due in the next 7 days.</Empty>}
       </Section>
+
+      <CCBrief />
 
       <Section title="Ten health lights" right={<a className="link-sm" href="#/strategy">Rules ›</a>}>
         <div className="leds">
@@ -107,6 +111,8 @@ export default function Home() {
           );
         })()}
       </Section>
+
+      <CCFacts />
 
       <div className="grid g2">
         <Section title="Next up">

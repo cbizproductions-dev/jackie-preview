@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, Empty, labelTime } from '../ui';
+import { CCNext7 } from '../cc';
 import { ROOMS } from '../../shared/derive';
 import { addDays, labelDay } from '../../shared/time';
 
@@ -32,6 +33,7 @@ export default function Calendar() {
           {!s.calendar.days.length && <Empty>The calendar couldn’t be read.</Empty>}
         </div>
       </Section>
+      <CCNext7 />
     </>
   );
 }

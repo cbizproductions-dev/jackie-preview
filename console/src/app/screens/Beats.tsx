@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, money, pct, Empty, HBars, NotionLink } from '../ui';
+import { CCRoom } from '../cc';
 import { ROOMS, isDurango } from '../../shared/derive';
 import { beatTransactions } from '../../shared/rules';
 
@@ -26,6 +27,7 @@ export default function Beats() {
   return (
     <>
       <Header kicker="Scout Trackers · Studio Board" title="Beats & Scouting" sources="Studio Board (sales), Scout Trackers counts via Command Center data.json, Intelligence Feed" notion={ROOMS.beats} art="redcarpet" />
+      <CCRoom room="beats" />
       <Section title="Beat sales">
         <div className="grid g3">
           <div className="panel"><div className="label">Purchases</div><div className="mid">{tx.count}</div><div className="cap">{leases} lease{leases === 1 ? '' : 's'} · a bundle counts once</div></div>

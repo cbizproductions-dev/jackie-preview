@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSnap, Header, Section, Empty, money, shortDay, NotionLink, day } from '../ui';
+import { CCRoom, CCEras } from '../cc';
 import { ROOMS } from '../../shared/derive';
 import { addDays } from '../../shared/time';
 
@@ -24,6 +25,7 @@ export default function Career() {
   return (
     <>
       <Header kicker="Milestones, Discoveries & Career" title="Career & Brand" sources="Milestones room, Command Center data.json (momentum), Photo Library" notion={ROOMS.career} art="redcarpet" />
+      <CCRoom room="milestones" />
       <Section title="Momentum timeline" right={
         <div role="tablist" style={{ display: 'flex', gap: 4 }}>{(['30', '90', '10y'] as const).map((v) => <button key={v} role="tab" aria-selected={view === v} onClick={() => setView(v)} className="pill" style={{ minHeight: 44, cursor: 'pointer', background: view === v ? 'var(--raised)' : 'none', color: view === v ? 'var(--gold-hi)' : undefined }}>{v === '10y' ? '10 years' : `${v} days`}</button>)}</div>
       }>
@@ -38,6 +40,8 @@ export default function Career() {
           <p className="cap">Verified = a statement, payment, agreement or Studio Board record is on file. Kris-reported = your account, not yet backed by a record.</p>
         </div>
       </Section>
+
+      <CCEras />
 
       <Section title="Career figures vs verified data">
         <div className="panel">

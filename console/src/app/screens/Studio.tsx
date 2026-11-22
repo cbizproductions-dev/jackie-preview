@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, money, pct, Fold, Empty, Led, day, shortDay, HBars, Math_ } from '../ui';
+import { CCRoom, CCFunnel } from '../cc';
 import { ROOMS, studioOps, rebookCandidates, goalTargets } from '../../shared/derive';
 import { isOverdue, weekCash } from '../../shared/rules';
 import { addDays, daysBetween } from '../../shared/time';
@@ -35,6 +36,7 @@ export default function Studio() {
   return (
     <>
       <Header kicker="Studio Board · Muse" title="Studio & Clients" sources="Studio Board — Muse mirror, Weekly Scorecard, Intelligence Feed" notion={ROOMS.studio} art="couch" />
+      <CCRoom room="studio" />
       {s.studio.synced && daysBetween(s.studio.synced, s.today) > 2 && <div className="banner warn">▲ Studio Board last synced {day(s.studio.synced)} — more than 2 days ago.</div>}
 
       <Section title="Mix queue" right={<span className="cap">{ops.queue.open} open · {ops.queue.overdue} overdue</span>}>
@@ -86,6 +88,8 @@ export default function Studio() {
           </div>
         </Section>
       </div>
+
+      <CCFunnel />
 
       <Section title="Mix delivery record">
         <div className="panel">

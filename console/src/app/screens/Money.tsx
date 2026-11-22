@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, WeeklyBars, StackBar, money, moneyAuto, pct, Fold, Math_, Ladder, Empty, NotionLink, signedPct } from '../ui';
+import { CCRoom, CCMoneyOnTable, CCPace, CCFootnote } from '../cc';
 import { ROOMS, goalTargets, laneTotals, monthMetrics, yearMetrics, studioOps } from '../../shared/derive';
 import { pace, weekCash, weekStatus, beatTransactions, round2, STUDIO_WEEKS_START } from '../../shared/rules';
 import { addDays, weekStart, parseLooseDate, daysBetween, labelDay } from '../../shared/time';
@@ -55,6 +56,8 @@ export default function Money() {
   return (
     <>
       <Header kicker="Cash Flow Radar · Revenue & Trajectory" title="Money" sources="Weekly Scorecard, Income Ledger, Goals & Milestones, Command Center data.json" notion={ROOMS.revenue} art="la" />
+
+      <CCRoom room="revenue" />
 
       <Section title="Weekly studio-side cash">
         <div className="panel">
@@ -112,6 +115,9 @@ export default function Money() {
         </div>
       </Section>
 
+      <CCRoom room="cash" title="Cash Flow Radar (Command Center)" />
+      <CCMoneyOnTable />
+
       <Section title="Pace & projections (estimates)">
         <div className="panel">
           {scen.length ? (
@@ -123,6 +129,8 @@ export default function Money() {
           <p className="cap">Estimates, not forecasts: simple arithmetic on studio-side cash. Sync and royalties come on top and aren’t guaranteed to repeat.</p>
         </div>
       </Section>
+
+      <CCPace />
 
       <Section title="Goals & milestones" right={<NotionLink href={ROOMS.goals}>Change a target ↗</NotionLink>}>
         <div className="grid g2">
@@ -146,6 +154,7 @@ export default function Money() {
           })}
         </div>
       </Section>
+      <CCFootnote />
       <p className="foot">Revenue, not profit. Expenses aren’t tracked here (Sterling tracks finances). {bestPrior ? `Pre-2023 years read low: 19 older BMI statements aren’t in the files.` : ''}</p>
     </>
   );

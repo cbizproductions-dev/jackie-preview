@@ -73,6 +73,10 @@ Running log so another Claude session can pick up. Newest first within each sect
 - If iCloud fails, the last good copy stays and the source shows as failed. The link is never logged.
 - To stop it: turn off "Public Calendar" on the iPhone, or delete the secret.
 
+## Command Center content in full (Nov 22)
+- `src/app/cc.tsx` shows the Command Center's own words from data.json, unshortened and labelled with its "as of" time: Home (headline, Today's brief, Interesting facts), each room's summary + all strip stats (Money, Studio, Beats, Sync, Contracts, Strategy, Career), Money on the table, CC pace + illustrative set-aside, counting footnote, recommended moves, experiments in detail + ideas, ROI read, eras and streaks, vibe funnel, week-ahead notes (Calendar). Agent view gets the headline, brief, facts, moves and room insights.
+- Durango hold filters every line. No extra Notion calls (data.json is already read).
+
 ## Open questions / blocked
 1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 

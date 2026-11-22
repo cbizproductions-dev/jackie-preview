@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSnap, Header, Section, Runway, Empty, day, NotionLink, Led, Fold } from '../ui';
+import { CCRoom } from '../cc';
 import { ROOMS } from '../../shared/derive';
 import { daysBetween, addDays } from '../../shared/time';
 
@@ -17,11 +18,11 @@ export default function Contracts() {
   const by = (pred: (c: (typeof s.contracts)[number]) => boolean) => s.contracts.filter(pred).length;
   const exitCounts = new Map<string, number>();
   for (const c of s.contracts.filter((c) => /representation|library|publishing/i.test(c.type ?? ''))) exitCounts.set(c.exit ?? 'Not stated', (exitCounts.get(c.exit ?? 'Not stated') ?? 0) + 1);
-  const ccStrip = ((s.cc?.room_strips?.contracts?.stats ?? []) as { v: string; l: string; n: string }[]);
 
   return (
     <>
       <Header kicker="Contract Vault · Maestro" title="Contracts & Rights" sources="Contract Vault (Maestro)" notion={ROOMS.contracts} art="redcarpet" />
+      <CCRoom room="contracts" />
       <Section title="Deadline runway" right={<span className="cap">Solid = confirmed · hollow/dashed = inferred</span>}>
         <div className="panel">
           {upcoming.length ? (
@@ -91,7 +92,6 @@ export default function Contracts() {
           <div className="panel"><div className="label">Representation & library deals</div><div className="mid">{by((c) => /representation|library|publishing/i.test(c.type ?? ''))}</div><div className="cap">{[...exitCounts.entries()].map(([k, v]) => `${v} ${k.toLowerCase()}`).join(' · ')}</div></div>
           <div className="panel"><div className="label">Split sheets · other</div><div className="mid">{by((c) => /split/i.test(c.type ?? ''))} · {by((c) => !/work for hire|representation|library|publishing|split/i.test(c.type ?? ''))}</div><div className="cap">{s.contracts.length} agreements on file</div></div>
         </div>
-        {ccStrip.length > 0 && <p className="cap">Command Center room strip: {ccStrip.map((x) => `${x.v} ${x.l}`).join(' · ')}.</p>}
       </Section>
       <p className="foot">Source: Contract Vault (Maestro). Not legal advice. Nothing here edits an agreement. <NotionLink href={ROOMS.vault} /></p>
     </>

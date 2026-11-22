@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSnap, Header, Section, Led, Empty, lightWord, NotionLink } from '../ui';
+import { CCRoom, CCMoves, CCExperiments, CCRoiRead } from '../cc';
 import { ROOMS, healthLights } from '../../shared/derive';
 
 const EVIDENCE = ['Established', 'Likely', 'Hypothesis'];
@@ -18,6 +19,8 @@ export default function Strategy() {
   return (
     <>
       <Header kicker="Strategy Room" title="Strategy" sources="Strategy Room, Intelligence Feed, snapshot (health lights computed here)" notion={ROOMS.strategy} art="couch" />
+      <CCRoom room="strategy" />
+      <CCRoiRead />
       <Section title="Ten health lights">
         <div className="panel">
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Area</th><th>Today</th><th>● Good</th><th>▲ Watch</th><th>■ Act</th></tr></thead>
@@ -34,6 +37,8 @@ export default function Strategy() {
           <p className="cap">Lights are the Command Center’s own (its daily refresh), so the Dashboard and Notion always match. Thresholds from the Strategy Room. No single blended score.</p>
         </div>
       </Section>
+
+      <CCMoves />
 
       <Section title="Insights feed" right={<NotionLink href={ROOMS.intel} />}>
         <div className="panel">
@@ -69,6 +74,8 @@ export default function Strategy() {
           }) : <Empty>No experiments on file.</Empty>}
         </div>
       </Section>
+
+      <CCExperiments />
 
       <Section title="Three futures">
         {s.futures.length ? (

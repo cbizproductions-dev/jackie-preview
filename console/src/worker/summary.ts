@@ -34,6 +34,24 @@ export function summaryText(s: Snapshot): string {
   L.push(`- Momentum: ${mo.windowWeeks ? `${mo.change >= 0 ? '+' : ''}${Math.round((mo.change ?? 0) * 100)}% (${mo.label})` : mo.reason}`);
   L.push(`- Last 8 weeks studio-side cash: ${s.weeks.slice(-8).map((w) => `${labelDay(w.start, { month: 'short', day: 'numeric' })} ${$(weekCash(w))}`).join(' · ')}`);
   L.push('');
+  // The Command Center's own words, in full (Durango hold applies).
+  const cc = (s.cc ?? {}) as Record<string, any>;
+  const keep = (t: unknown) => typeof t === 'string' && t.trim() !== '' && !D.isDurango(t);
+  if (cc.as_of) {
+    L.push(`## From the Command Center (as of ${cc.as_of})`);
+    if (keep(cc.headline)) L.push(cc.headline);
+    for (const g of Array.isArray(cc.brief) ? cc.brief : []) {
+      const items = (g.items ?? []).filter(keep);
+      if (items.length) { L.push(`${g.title}:`); for (const i of items) L.push(`- ${i}`); }
+    }
+    const facts = (Array.isArray(cc.facts) ? cc.facts : []).filter((f: any[]) => keep(f[1]) && !D.isDurango(String(f[2] ?? '')));
+    if (facts.length) { L.push('Interesting facts:'); for (const f of facts) L.push(`- ${f[0]} — ${f[1]}${f[2] ? ` (${f[2]})` : ''}`); }
+    const moves = (Array.isArray(cc.moves) ? cc.moves : []).filter((m: any) => keep(m.title) && !D.isDurango(m.action ?? ''));
+    if (moves.length) { L.push('Recommended moves:'); for (const m of moves) L.push(`- [${m.urgency}] ${m.title} — ${m.action}`); }
+    const ins = cc.insights && typeof cc.insights === 'object' ? Object.entries(cc.insights).filter(([, v]) => keep(v)) : [];
+    if (ins.length) { L.push('Room by room:'); for (const [k, v] of ins) L.push(`- ${k}: ${v}`); }
+    L.push('');
+  }
   L.push("## Today's moves");
   const moves = D.todaysMoves(s);
   if (!moves.length) L.push('- Nothing overdue, owed or due in the next 7 days.');

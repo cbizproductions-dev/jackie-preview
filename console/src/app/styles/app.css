@@ -262,3 +262,16 @@ details.math .well { font: 13px/1.5 var(--font-num); color: var(--ink-2); margin
   .shell:not(.embedded) .chart text { font-size: 13px; }
   .shell:not(.embedded) .mid { font-size: 26px; }
 }
+
+/* From the Command Center */
+.cc-headline { margin-top: var(--gap); }
+.cc-headline p { margin: 6px 0; font-size: 18px; line-height: 1.45; color: var(--ink); }
+.cc-say { margin: 8px 0 4px; font-size: 16px; line-height: 1.5; color: var(--ink-2, var(--ink)); }
+.cc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+@media (min-width: 900px) { .cc-stats { grid-template-columns: repeat(4, 1fr); } }
+.cc-stat { min-width: 0; }
+.cc-v { display: inline-block; font-family: var(--mono, inherit); font-size: 22px; font-weight: 600; color: var(--ink); padding-bottom: 2px; }
+.cc-l { font-size: 14px; color: var(--ink); margin-top: 2px; }
+.cc-big { font-family: var(--mono, inherit); font-size: 28px; font-weight: 600; color: var(--ink); line-height: 1.1; margin-bottom: 4px; }
+.cc-list { margin: 6px 0 0; padding-left: 18px; }
+.cc-list li { margin: 4px 0; line-height: 1.45; }
