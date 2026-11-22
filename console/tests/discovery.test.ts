@@ -51,3 +51,13 @@ describe('Discovered databases (Brand Presence, Speaking & Funding Leads)', () =
     expect(snap.brand.rows[0]).toMatchObject({ item: 'Instagram', status: 'Active', key: '12.4K followers' });
   });
 });
+
+import { summaryText } from '../src/worker/summary';
+describe('Agent view (plain text)', () => {
+  it('renders from an empty snapshot without throwing, and marks missing as missing', () => {
+    const snap = assemble({ sources: {} }, new Date('2026-11-22T15:00:00Z'));
+    const t = summaryText(snap);
+    expect(t).toMatch(/agent view \(read only\)/);
+    expect(t).toMatch(/This week .*Not on file/);
+  });
+});

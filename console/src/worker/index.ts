@@ -4,6 +4,7 @@
  */
 import { NotionReader } from './notion';
 import { EMBEDDED } from 'cbiz-assets';
+import { summaryText } from './summary';
 import { refreshPass, assemble, KEYS, STALE_AFTER_MS, RETRY_FAILED_MS, type State } from './snapshot';
 
 export interface Env {
@@ -99,6 +100,12 @@ export default {
     if (!m[2]) return new Response(null, { status: 308, headers: { ...SECURITY_HEADERS, Location: `${url.pathname}/${url.search}` } });
     const rest = m[2];
     if (rest === '/api/snapshot') return getSnapshot(env, ctx, url);
+    // Plain-text agent view (no JavaScript needed) for Cabinet agents. Same key, same read-only data.
+    if (rest === '/summary' || rest === '/summary.txt') {
+      const r = await getSnapshot(env, ctx, url);
+      if (!r.ok) return r;
+      return new Response(summaryText((await r.json()) as any), { headers: { ...SECURITY_HEADERS, 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } });
+    }
     if (rest.startsWith('/api/')) return notFound();
     // Static app files (built by Vite). Unknown paths fall back to index.html (hash routing).
     const assetPath = rest === '/' || rest === '' ? '/index.html' : rest;
