@@ -194,7 +194,7 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     const added = mergeApple(merged.calendar as Snapshot['calendar'], st.apple, today);
     const ok = !st.apple.error;
     if (!ok) failed.push('Apple Calendar (live feed)');
-    sources.push({ id: 'apple', name: 'Apple Calendar (live feed)', owner: 'Kris', kind: 'page', url: 'https://www.icloud.com/calendar/', lastEdited: st.apple.readAt, readAt: st.apple.readAt, state: ok ? 'fresh' : 'failed', note: ok ? `Read live on open · ${st.apple.items.length} events in the next 60 days · ${added} not on the Notion calendar yet` : `${st.apple.error}${st.apple.items.length ? ' — showing the last good copy' : ''}` });
+    sources.push({ id: 'apple', name: 'Apple Calendar (live feed)', owner: 'Kris', kind: 'page', url: 'https://www.icloud.com/calendar/', lastEdited: st.apple.readAt, readAt: st.apple.readAt, state: ok ? 'fresh' : 'failed', note: ok ? `Read live on open · ${st.apple.items.length} events in the next 60 days · ${added} not on the Notion calendar yet${st.apple.stats ? ` · shared calendar holds ${st.apple.stats.events} events, next one from today on: ${st.apple.stats.nextStart ?? 'none'}` : ''}` : `${st.apple.error}${st.apple.items.length ? ' — showing the last good copy' : ''}` });
   }
 
   merged.members = st.members ?? [];

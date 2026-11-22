@@ -6,7 +6,7 @@
  */
 
 export type AppleEvent = { date: string; time: string | null; title: string; start: string };
-export type AppleState = { items: AppleEvent[]; readAt: string | null; error?: string | null; calendars?: number };
+export type AppleState = { items: AppleEvent[]; readAt: string | null; error?: string | null; calendars?: number; stats?: { events: number; repeating: number; latest: string | null; upcoming?: number; nextStart?: string | null; byMonth?: Record<string, number> } };
 
 const NY = 'America/New_York';
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
@@ -231,15 +231,24 @@ export async function readApple(urls: string, today: string, toDay: string, prev
   if (!list.length) return { items: prev?.items ?? [], readAt: prev?.readAt ?? null, error: 'The Apple Calendar link isn’t a valid webcal:// or https:// link' };
   try {
     const items: AppleEvent[] = [];
+    const stats = { events: 0, repeating: 0, latest: null as string | null, upcoming: 0, nextStart: null as string | null, byMonth: {} as Record<string, number> };
     for (const u of list) {
       const res = await fetchImpl(u, { headers: { Accept: 'text/calendar' }, signal: AbortSignal.timeout(8000) });
       if (!res.ok) throw new Error(`Apple Calendar answered ${res.status}${res.status === 404 ? ' (the calendar may no longer be public)' : ''}`);
       const text = await res.text();
       if (!/BEGIN:VCALENDAR/.test(text)) throw new Error('Apple Calendar link didn’t return a calendar');
       items.push(...parseIcs(text, today, toDay));
+      for (const ev of readEvents(text)) {
+        stats.events++;
+        if (ev.rrule) stats.repeating++;
+        const d = `${ev.start.y}-${pad(ev.start.m)}-${pad(ev.start.d)}`;
+        if (!stats.latest || d > stats.latest) stats.latest = d;
+        stats.byMonth[d.slice(0, 7)] = (stats.byMonth[d.slice(0, 7)] ?? 0) + 1;
+        if (d >= today) { stats.upcoming++; if (!stats.nextStart || d < stats.nextStart) stats.nextStart = d; }
+      }
     }
     items.sort((a, b) => a.start.localeCompare(b.start));
-    return { items, readAt: new Date().toISOString(), error: null, calendars: list.length };
+    return { items, readAt: new Date().toISOString(), error: null, calendars: list.length, stats };
   } catch (e) {
     const msg = String((e as Error).message ?? e).replace(/https?:\/\/\S+/g, '[link]');
     return { items: prev?.items ?? [], readAt: prev?.readAt ?? null, error: msg, calendars: list.length };
