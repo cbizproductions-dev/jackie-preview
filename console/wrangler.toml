@@ -1,5 +1,6 @@
 # C-BIZ Console — one Worker serving the static app and a read-only /api/snapshot.
 name = "cbiz-console"
+account_id = "5944c3a0070ea5f916836cf0c750a1ad"   # Cbizproductions@gmail.com's Account — pinned so a deploy can never land elsewhere
 main = "src/worker/index.ts"
 compatibility_date = "2026-11-01"
 workers_dev = true

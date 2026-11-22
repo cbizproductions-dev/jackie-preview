@@ -25,52 +25,87 @@ export type SrcState = {
   /** Data is the build-time capture, not a live read yet. */
   fromSeed?: boolean;
 };
-export type State = { sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null };
+export type State = { sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null; /** Time of the last completed change check. */ sweptAt?: string | null };
 
 export const KEYS = { state: 'state:v1', snapshot: 'snapshot:v1', seed: 'seed:v1', seedState: 'seed-state:v1', lock: 'lock:v1' } as const;
 export const STALE_AFTER_MS = 15 * 60 * 1000;
 /** A Partial snapshot retries its failed sources sooner. */
 export const RETRY_FAILED_MS = 2 * 60 * 1000;
+/** Full per-source check at least this often (the one-call sweep covers the time in between). */
+export const FULL_CHECK_MS = 6 * 3600 * 1000;
+/** Search results can lag a little; each sweep looks back this much further. */
+export const SWEEP_OVERLAP_MS = 10 * 60 * 1000;
 
 /**
  * One refresh pass. Probes sources whose last check is older than 15 minutes, re-reads only those whose
  * last_edited_time changed, and stops starting new reads once the call budget is used (Workers Free allows
  * 50 outbound requests per invocation). Remaining sources stay "needsRead" for the next pass.
  */
-export async function refreshPass(reader: NotionReader, prev: State, opts: { budget: number; now: Date; force?: boolean }): Promise<{ state: State; pending: string[] }> {
+export async function refreshPass(reader: NotionReader, prev: State, opts: { budget: number; now: Date; force?: boolean }): Promise<{ state: State; pending: string[]; mode: 'sweep' | 'full'; changed: string[] }> {
   const state: State = { ...prev, sources: { ...prev.sources } };
   const nowIso = opts.now.toISOString();
   const today = nyDate(opts.now);
-  const order = [...SOURCES].sort((a, b) => (state.sources[a.id]?.checkedAt ?? '').localeCompare(state.sources[b.id]?.checkedAt ?? ''));
   const pending: string[] = [];
+  const changed: string[] = [];
+  const dash = (id: string | null | undefined) => (id ?? '').replace(/-/g, '');
+
+  // 1) Find what changed. Normally ONE Notion search call ("edited since the last check"), not one call per source.
+  //    A full per-source probe runs when there's no recent sweep (first run, >6 h, or the search failed).
+  let mode: 'sweep' | 'full' = 'full';
+  const sweptAt = state.sweptAt ? Date.parse(state.sweptAt) : 0;
+  if (!opts.force && sweptAt && opts.now.getTime() - sweptAt < FULL_CHECK_MS) {
+    try {
+      const since = new Date(sweptAt - SWEEP_OVERLAP_MS).toISOString();
+      const hits = await reader.editedSince(since, 3);
+      mode = 'sweep';
+      for (const def of SOURCES) {
+        const s = state.sources[def.id];
+        const same = (a: string | null | undefined, b: string | null | undefined) => !!a && !!b && dash(a) === dash(b);
+        const match = hits.find((h) =>
+          (def.kind === 'page' && same(h.id, def.notionId)) ||
+          (def.kind === 'database' && (same(h.parentDb, def.notionId) || same(h.parentDs, s?.dataSourceId) || same(h.id, s?.dataSourceId))),
+        );
+        if (match && s) { state.sources[def.id] = { ...s, needsRead: true, lastEdited: match.edited }; changed.push(def.id); }
+      }
+      // Cabinet logs: last activity comes straight from the search results (no extra calls).
+      if (state.members) state.members = state.members.map((m) => {
+        const h = hits.find((x) => dash(x.id) === dash(m.logUrl.split('/').pop()));
+        return h && (!m.lastActive || h.edited > m.lastActive) ? { ...m, lastActive: h.edited } : m;
+      });
+      state.sweptAt = nowIso;
+    } catch { mode = 'full'; }
+  }
+
+  const order = [...SOURCES].sort((a, b) => (state.sources[a.id]?.checkedAt ?? '').localeCompare(state.sources[b.id]?.checkedAt ?? ''));
   for (const def of order) {
     const s: SrcState = state.sources[def.id] ? { ...state.sources[def.id] } : { lastEdited: null, checkedAt: null, readAt: null, data: null };
     if (!s.data || s.fromSeed) s.needsRead = true;
-    const fresh = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < STALE_AFTER_MS && !opts.force && !s.needsRead;
-    if (reader.calls >= opts.budget - 2) { if (!fresh || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
+    if (reader.calls >= opts.budget - 2) { if (mode === 'full' || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
     if (def.discover) {
-      const recent = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < 6 * 3600 * 1000 && s.data && !s.fromSeed;
+      const recent = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < FULL_CHECK_MS && s.data && !s.fromSeed && !s.needsRead;
       if (!recent && reader.calls < opts.budget * 0.7) {
         try {
           const r = await def.read(reader, today);
           s.data = r.data; s.lastEdited = r.lastEdited; s.readAt = nowIso; s.checkedAt = nowIso; s.error = null; s.needsRead = false; s.fromSeed = false;
+          const found = Object.values(r.data)[0] as any;
+          if (found?.dsId) s.dataSourceId = found.dsId;
         } catch (e) { s.error = String((e as Error).message ?? e).slice(0, 200); s.checkedAt = null; }
       }
       state.sources[def.id] = s;
       continue;
     }
     try {
-      if (!fresh) {
+      if (mode === 'full' && !s.needsRead) {
         let lastEdited: string | null;
         if (def.kind === 'database') {
           const p = await reader.probeDatabase(def.notionId, s.dataSourceId);
           lastEdited = p.lastEdited;
           s.dataSourceId = p.dataSourceId;
         } else lastEdited = (await reader.page(def.notionId)).last_edited_time ?? null;
-        s.checkedAt = nowIso;
-        if (lastEdited !== s.lastEdited || !s.data) s.needsRead = true;
+        if (lastEdited !== s.lastEdited) { s.needsRead = true; changed.push(def.id); }
         s.lastEdited = lastEdited;
       }
+      s.checkedAt = nowIso;
       if (s.needsRead) {
         if (reader.calls >= opts.budget * 0.7) { pending.push(def.id); state.sources[def.id] = s; continue; }
         const r = await def.read(reader, today);
@@ -79,6 +114,9 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
         s.readAt = nowIso;
         s.needsRead = false;
         s.fromSeed = false;
+        if (def.kind === 'database' && !s.dataSourceId) {
+          try { s.dataSourceId = (await reader.database(def.notionId)).data_sources?.[0]?.id ?? null; } catch { /* optional */ }
+        }
       }
       s.error = null;
     } catch (e) {
@@ -87,15 +125,16 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
     }
     state.sources[def.id] = s;
   }
-  // Cabinet activity: cheap (one call per log + one per section page), refreshed at most every 6 hours.
-  if (reader.calls < opts.budget - 10 && (!state.membersAt || opts.now.getTime() - Date.parse(state.membersAt) > 6 * 3600 * 1000)) {
+  if (mode === 'full' && !pending.length) state.sweptAt = nowIso;
+  // Cabinet roles: re-read at most every 6 hours (activity times come from the sweep).
+  if (reader.calls < opts.budget - 10 && (!state.membersAt || opts.now.getTime() - Date.parse(state.membersAt) > FULL_CHECK_MS)) {
     try {
       const sm = (state.sources.system?.data?._sourceMap as string[][]) ?? [];
       state.members = await readCabinet(reader, sm);
       state.membersAt = nowIso;
     } catch { /* keep previous */ }
   }
-  return { state, pending };
+  return { state, pending, mode, changed };
 }
 
 const EMPTY: Omit<Snapshot, 'generatedAt' | 'today' | 'mode' | 'state' | 'failed' | 'sources' | 'issues'> = {
@@ -129,7 +168,11 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     else if (!s || (!s.data && !s.error)) { state = 'not_connected'; note = 'Not read yet'; failed.push(def.name); }
     else if (s.fromSeed && !s.error) { state = 'stale'; note = 'Showing the build-time capture until the first live read'; failed.push(def.name); }
     else if (s.error) { state = 'failed'; note = `${explainError(s.error)} — ${s.data ? `showing last good data${s.readAt ? ` from ${s.readAt.slice(0, 10)}` : ''}` : 'no data yet'}`; failed.push(def.name); }
-    if (def.id === 'studio' && s?.data) state = state === 'failed' ? state : freshnessOf(s.lastEdited, nowIso);
+    if (def.id === 'studio' && s?.data && state !== 'failed') {
+      const synced = (merged.studio?.synced as string | null) ?? null;
+      state = freshnessOf(synced ? `${synced}T23:59:00-05:00` : s.lastEdited, nowIso);
+      if (synced) note = `Board last synced ${synced}`;
+    }
     sources.push({ id: def.id, name: def.name, owner: def.owner, kind: def.kind, url: def.discover ? ((Object.values(s?.data ?? {})[0] as any)?.url || 'https://app.notion.com/p/1488b67fa84e80f69ff0c33b8ecc1b94') : `https://app.notion.com/p/${def.notionId}`, lastEdited: s?.lastEdited ?? null, readAt: s?.readAt ?? null, state, note });
   }
   // Calendar freshness uses its own "Last verified" line, not just the page edit time.

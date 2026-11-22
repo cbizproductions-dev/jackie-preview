@@ -167,6 +167,21 @@ export function knownGaps(s: Snapshot): string[] {
 }
 
 export function healthLights(s: Snapshot): H.HealthLight[] {
+  const computed = computedHealthLights(s);
+  const cc = Array.isArray(s.cc?.health) ? (s.cc.health as { area: string; state: string; note?: string }[]) : [];
+  const asOf = typeof s.cc?.as_of === 'string' ? s.cc.as_of : '';
+  return computed.map((c) => {
+    const m = cc.find((h) => h.area?.trim().toLowerCase() === c.area.toLowerCase());
+    const st = m?.state?.toLowerCase();
+    if (m && (st === 'green' || st === 'amber' || st === 'red')) {
+      return { ...c, light: st, today: m.note || c.today, note: `Command Center refresh${asOf ? `, ${asOf}` : ''}`, source: 'command_center', computed: c.light, computedToday: c.today };
+    }
+    return { ...c, source: 'dashboard' };
+  });
+}
+
+/** The Dashboard's own evaluation of the Strategy Room thresholds — used only where the Command Center has no light. */
+export function computedHealthLights(s: Snapshot): H.HealthLight[] {
   const { goal } = goalTargets(s);
   const cat = catalogNumbers(s);
   return [

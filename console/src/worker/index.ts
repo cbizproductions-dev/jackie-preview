@@ -5,7 +5,7 @@
 import { NotionReader } from './notion';
 import { EMBEDDED } from 'cbiz-assets';
 import { summaryText } from './summary';
-import { refreshPass, assemble, KEYS, STALE_AFTER_MS, RETRY_FAILED_MS, type State } from './snapshot';
+import { refreshPass, assemble, KEYS, explainError, type State } from './snapshot';
 
 export interface Env {
   SNAP: KVNamespace;
@@ -43,52 +43,45 @@ function withHeaders(res: Response, extra: Record<string, string> = {}) {
   return new Response(res.body, { status: res.status, headers: h });
 }
 
-async function getSnapshot(env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
-  const cached = await env.SNAP.get(KEYS.snapshot, 'json') as any;
-  const now = new Date();
-  let body = cached;
-  let refreshing = false;
+/**
+ * GET /api/snapshot          → the saved copy, instantly (first paint).
+ * GET /api/snapshot?fresh=1  → reads Notion now (only what changed), saves it, returns it.
+ * If Notion can't be read, the saved copy is returned with fallback=true and its time, never a blank screen.
+ * The read happens inside the request (no background work), so Cloudflare's 30-second background cutoff can't kill it.
+ */
+async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response> {
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...SECURITY_HEADERS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+  const cached = (await env.SNAP.get(KEYS.snapshot, 'json')) as any;
   if (!env.NOTION_TOKEN) {
-    // Not connected to Notion yet: serve the build-time capture, clearly labelled as such.
-    body = cached ?? (await env.SNAP.get(KEYS.seed, 'json'));
-  } else {
-    const age = cached ? now.getTime() - Date.parse(cached.generatedAt) : Infinity;
-    const pendingKey = await env.SNAP.get('pending:v1');
-    const wantsMore = url.searchParams.get('continue') === '1' && !!pendingKey;
-    const retryFailedSoon = cached?.state === 'partial' && age > RETRY_FAILED_MS;
-    if (age > STALE_AFTER_MS || wantsMore || retryFailedSoon) {
-      const locked = await env.SNAP.get(KEYS.lock);
-      if (!locked) {
-        refreshing = true;
-        const work = (async () => {
-          await env.SNAP.put(KEYS.lock, '1', { expirationTtl: 60 });
-          try {
-            // First live run starts from the build-time capture, so a failed source shows captured data, never a blank screen.
-            const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? { sources: {} };
-            const seedState = (await env.SNAP.get(KEYS.seedState, 'json')) as State | null;
-            for (const [id, s] of Object.entries(seedState?.sources ?? {})) {
-              const cur = prev.sources[id];
-              if (!cur?.data && s.data) prev.sources[id] = { ...(cur ?? s), data: s.data, readAt: s.readAt, fromSeed: true, needsRead: true };
-            }
-            const reader = new NotionReader(env.NOTION_TOKEN!);
-            const { state, pending } = await refreshPass(reader, prev, { budget: Number(env.NOTION_CALL_BUDGET ?? 40), now: new Date() });
-            await env.SNAP.put(KEYS.state, JSON.stringify(state));
-            const snap = assemble(state, new Date(), 'live');
-            await env.SNAP.put(KEYS.snapshot, JSON.stringify({ ...snap, pending }));
-            if (pending.length) await env.SNAP.put('pending:v1', pending.join(','), { expirationTtl: 3600 });
-            else await env.SNAP.delete('pending:v1');
-          } finally {
-            await env.SNAP.delete(KEYS.lock);
-          }
-        })();
-        if (!cached) await work; // first ever load: wait for it
-        else ctx.waitUntil(work);
-        if (!cached) body = await env.SNAP.get(KEYS.snapshot, 'json');
-      } else refreshing = true;
-    }
+    const seed = cached ?? (await env.SNAP.get(KEYS.seed, 'json'));
+    return seed ? json({ ...seed, servedFrom: 'saved', savedAt: seed.generatedAt }) : json({ error: 'No snapshot yet' }, 503);
   }
-  if (!body) return new Response(JSON.stringify({ error: 'No snapshot yet' }), { status: 503, headers: { ...SECURITY_HEADERS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
-  return new Response(JSON.stringify({ ...body, refreshing }), { headers: { ...SECURITY_HEADERS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+  if (!fresh && cached) return json({ ...cached, servedFrom: 'saved', savedAt: cached.generatedAt });
+
+  const t0 = Date.now();
+  const reader = new NotionReader(env.NOTION_TOKEN);
+  try {
+    // First live run starts from the build-time capture, so a source Notion can't serve shows captured data, never a blank screen.
+    const prev = ((await env.SNAP.get(KEYS.state, 'json')) as State) ?? { sources: {} };
+    const seedState = (await env.SNAP.get(KEYS.seedState, 'json')) as State | null;
+    for (const [id, s] of Object.entries(seedState?.sources ?? {})) {
+      const cur = prev.sources[id];
+      if (!cur?.data && s.data) prev.sources[id] = { ...(cur ?? s), data: s.data, readAt: s.readAt, fromSeed: true, needsRead: true };
+    }
+    const now = new Date();
+    const { state, pending, mode, changed } = await refreshPass(reader, prev, { budget: Number(env.NOTION_CALL_BUDGET ?? 40), now });
+    const snap = { ...assemble(state, now, 'live'), pending };
+    await env.SNAP.put(KEYS.state, JSON.stringify(state));
+    await env.SNAP.put(KEYS.snapshot, JSON.stringify(snap));
+    // No key, token or URL in logs: just the shape of the refresh.
+    console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, ms: Date.now() - t0 }));
+    return json({ ...snap, servedFrom: 'live', notionCalls: reader.calls });
+  } catch (e) {
+    const reason = explainError(String((e as Error).message ?? e));
+    console.log(JSON.stringify({ evt: 'refresh_failed', notionCalls: reader.calls, reason, ms: Date.now() - t0 }));
+    if (cached) return json({ ...cached, servedFrom: 'saved', savedAt: cached.generatedAt, fallback: true, fallbackReason: reason });
+    return json({ error: reason }, 503);
+  }
 }
 
 export default {
@@ -99,10 +92,10 @@ export default {
     if (!m || !safeEqual(m[1], env.ACCESS_KEY ?? '')) return notFound();
     if (!m[2]) return new Response(null, { status: 308, headers: { ...SECURITY_HEADERS, Location: `${url.pathname}/${url.search}` } });
     const rest = m[2];
-    if (rest === '/api/snapshot') return getSnapshot(env, ctx, url);
+    if (rest === '/api/snapshot') return getSnapshot(env, url, url.searchParams.get('fresh') === '1');
     // Plain-text agent view (no JavaScript needed) for Cabinet agents. Same key, same read-only data.
     if (rest === '/summary' || rest === '/summary.txt') {
-      const r = await getSnapshot(env, ctx, url);
+      const r = await getSnapshot(env, url, true);
       if (!r.ok) return r;
       return new Response(summaryText((await r.json()) as any), { headers: { ...SECURITY_HEADERS, 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } });
     }

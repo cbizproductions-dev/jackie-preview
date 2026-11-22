@@ -23,7 +23,7 @@ Running log so another Claude session can pick up. Newest first within each sect
 - [~] Phase 5 — QA: everything runnable here passes (see below); Notion-embed and iPhone checks need the deployed URL.
 
 ## QA done in this session (Nov 21)
-- 57 unit tests pass: every counting rule, every metric-dictionary formula, health thresholds, access model (404 without key, no write methods), read-only guard, 429 backoff, failed source keeps last good data + Partial, unchanged sources not re-read, call budget, Durango hold.
+- 72 unit tests pass (Nov 22): every counting rule, every metric-dictionary formula, health thresholds, access model (404 without key, no write methods), read-only guard, 429 backoff, failed source keeps last good data + Partial, unchanged sources not re-read, call budget, Durango hold.
 - Real-data check (`fixtures/local.test.ts`, local only): parsers reproduce the Command Center's mix queue, vibe conversion, concentration and this-week figures exactly.
 - Local `wrangler dev`: every path without the key → 404; POST → 404; `/c/<key>` → 308 to `/c/<key>/`; noindex, CSP frame-ancestors, no-referrer present; no X-Frame-Options.
 - Bundle: 85 KB gzipped main JS (+ ~3 KB per lazy screen); fonts self-hosted; no third-party hosts except Instagram embeds; no secrets in `dist/` or git history.
@@ -44,7 +44,7 @@ Running log so another Claude session can pick up. Newest first within each sect
   A real-data test (`fixtures/local.test.ts`) runs only where the fixtures exist.
 - **Seed mode.** Until `NOTION_TOKEN` is set, the Worker serves a build-time capture (KV key `seed:v1`), labelled in the UI.
 - **Notion-Version `2025-09-03`** (data sources). developers.notion.com is blocked from this sandbox, so a newer version couldn't be checked. One constant in `src/worker/notion.ts`.
-- **Call budget per visit** (`NOTION_CALL_BUDGET`, default 40) because Workers Free caps outbound requests at 50 per invocation. The client keeps polling `?continue=1` while sources are pending. On Workers Paid this can go to ~400.
+- **Call budget per visit** (`NOTION_CALL_BUDGET`, default 40) because Workers Free caps outbound requests at 50 per invocation. The client repeats `?fresh=1` (max 4) while sources are pending. On Workers Paid this can go to ~400.
 - **Freshness probe:** databases = newest row's `last_edited_time` (1 query, data source id cached); pages = page `last_edited_time`.
 - **Freshness light** counts only the daily-feed sources (Studio Board, Calendar "Last verified", Command Center daily run). Slow-moving references (Contract Vault, Sync Tracker…) show their age but don't trip it. Matches how the Command Center sets its light.
 - **Studio revenue light**: the in-progress week counts only once it has already passed the goal (cash received can't go down). Otherwise complete weeks only.
@@ -54,10 +54,20 @@ Running log so another Claude session can pick up. Newest first within each sect
 - **Calendar**: titles and times only; notes (addresses etc.) are not shown.
 - Command Center `data.json` (runbook code block) is read for derived displays (health notes, ROI, scouting/briefs/contacts counts, momentum events, cash calendar, projections).
 
+## Nov 22 update (accounts, freshness, Command Center match)
+- **Account pinned.** `wrangler.toml` now has `account_id = "5944c3a0070ea5f916836cf0c750a1ad"` (cbizproductions@gmail.com). Worker `cbiz-console`, KV `SNAP`, both secrets live there. No Pages project, no cron.
+- **Fresh on every open.** The app shows the saved copy instantly, then calls `/api/snapshot?fresh=1`, which refreshes inside that request (the old background refresh was cut off after 30 s, which is why the snapshot got stuck).
+  Change detection = one Notion search sorted by last edit (the "sweep", 1 call); only sources edited since the last pass are re-read. A full check of every source runs on first use, after a failure, or every 6 h. Budget stays 40.
+  If Notion fails, the saved copy is shown with a banner naming its time.
+- **Health lights come from the Command Center** (`data.json` → `health`), so the Dashboard and Notion always agree. If live data reads differently, the Strategy screen says so under the light. Fallback: the Dashboard's own computation.
+- **Studio freshness** uses the Studio Board's own "Last synced" date, not the page's edit time.
+- **One mix count:** "X open · Y overdue · Z due in the next 7 days", where Z never includes overdue mixes. Same wording on Home, Strategy, Studio and the agent view.
+- **Who writes SNAP:** only the Worker (`snapshot:v1`, `state:v1`). `seed:v1` and `seed-state:v1` were one-time uploads during the build (Nov 21). No scheduled task writes to it.
+- **Checked live (Nov 22):** whoami = cbizproductions@gmail.com; tail during 4 loads: no errors; full check 20 Notion calls / ~7 s, normal open 1 call / ~1 s; CPU 23–52 ms per fresh request; numbers on screen in 0.4–1.5 s on a phone-size screen, fresh data in 1.4–2.1 s.
+  All headline numbers and all 10 lights match the Command Center (as of Sun Nov 22, 11:05 AM ET).
+
 ## Open questions / blocked
-1. Cloudflare: deploy target is Kris's **cbizproductions@gmail.com** account (the connected Cloudflare connector is a different account). Sandbox can't reach api.cloudflare.com. Kris declined the in-session token form on Nov 21. Needs: Cloudflare API token (Edit Workers template) added as a network secret for host `api.cloudflare.com`, or Kris runs `npm run deploy` from a laptop.
-2. Notion read-only integration token (README "Connect Notion").
-3. Phase 4 page approval.
+1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 
 ## Discrepancies found (Phase 0)
 Details (with names and amounts) are kept out of git: see `fixtures/DISCREPANCIES.md` locally and the final report to Kris.

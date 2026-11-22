@@ -15,7 +15,7 @@ export class NotionReader {
   private gapMs: number;
   calls = 0;
   constructor(private token: string, opts: { requestsPerSecond?: number; fetchImpl?: typeof fetch; sleep?: (ms: number) => Promise<void> } = {}) {
-    this.gapMs = 1000 / (opts.requestsPerSecond ?? 2.5);
+    this.gapMs = 1000 / (opts.requestsPerSecond ?? 3);
     this.fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
     this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
   }
@@ -86,6 +86,22 @@ export class NotionReader {
     return { rows, lastEdited };
   }
   /** Cheapest freshness check: the most recently edited row (and the data source id, cached by the caller). */
+  /** Everything shared with the integration and edited since `since` (newest first). One call per 100 results. Read-only. */
+  async editedSince(since: string, maxPages = 3): Promise<{ id: string; edited: string; parentDs: string | null; parentDb: string | null }[]> {
+    const out: { id: string; edited: string; parentDs: string | null; parentDb: string | null }[] = [];
+    let cursor: string | undefined;
+    for (let p = 0; p < maxPages; p++) {
+      const r = await this.req('POST', '/search', { sort: { timestamp: 'last_edited_time', direction: 'descending' }, page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) });
+      let older = false;
+      for (const x of r.results ?? []) {
+        if (x.last_edited_time < since) { older = true; break; }
+        out.push({ id: x.id, edited: x.last_edited_time, parentDs: x.parent?.data_source_id ?? null, parentDb: x.parent?.database_id ?? null });
+      }
+      if (older || !r.has_more) return out;
+      cursor = r.next_cursor;
+    }
+    throw new Error('Too many edits to sweep; doing a full check');
+  }
   async probeDatabase(databaseId: string, dataSourceId?: string | null): Promise<{ lastEdited: string | null; dataSourceId: string }> {
     let ds = dataSourceId;
     if (!ds) ds = (await this.database(databaseId)).data_sources?.[0]?.id as string;

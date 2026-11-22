@@ -4,7 +4,7 @@ import { concentration, mixQueue, vibeConversion, weekCash, weekStatus, bmiChang
 import type { Snapshot } from './schema';
 
 export type Light = 'green' | 'amber' | 'red' | 'none';
-export type HealthLight = { area: string; light: Light; today: string; rule: { green: string; amber: string; red: string }; note: string };
+export type HealthLight = { area: string; light: Light; today: string; rule: { green: string; amber: string; red: string }; note: string; source?: 'command_center' | 'dashboard'; computed?: Light; computedToday?: string };
 
 export const RULES: Record<string, { green: string; amber: string; red: string }> = {
   'Studio revenue': { green: 'Goal hit in 2 of last 3 weeks', amber: '1 of 3', red: '0 of 3' },
@@ -38,11 +38,11 @@ export function studioRevenueLight(weeks: Snapshot['weeks'], goal: number | null
 
 export function deliveryLight(mixes: Snapshot['studio']['mixes'], today: string): HealthLight {
   const q = mixQueue(mixes, today);
-  const withinWeek = q.overdue + q.dueWithinWeek;
+  // Threshold "6+ due within a week" = overdue + due in the next 7 days (both must be delivered this week).
   let light: Light = 'green';
-  if (q.overdue >= 2 && withinWeek >= 6) light = 'red';
+  if (q.overdue >= 2 && q.overdue + q.dueWithinWeek >= 6) light = 'red';
   else if (q.overdue >= 1 || q.open >= 6) light = 'amber';
-  return L('Delivery capacity', light, `${q.open} open · ${q.overdue} overdue · ${withinWeek} due within a week`);
+  return L('Delivery capacity', light, `${q.open} open · ${q.overdue} overdue · ${q.dueWithinWeek} due in the next 7 days`);
 }
 
 export function concentrationLight(clients: Snapshot['studio']['clients']): HealthLight {

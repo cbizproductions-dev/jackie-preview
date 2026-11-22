@@ -48,7 +48,7 @@ export default function Home() {
         <button className="meter" onClick={go('studio')} aria-label={`Mix queue ${ops.queue.open} open, ${ops.queue.overdue} overdue. Open Studio.`}>
           <span className="label">Mix queue</span>
           <span className="val sm" style={{ color: ops.queue.overdue ? 'var(--bad)' : undefined }}>{ops.queue.open} open</span>
-          <span className="msub"><Led light={ops.queue.overdue ? 'red' : ops.queue.open >= 6 ? 'amber' : 'green'} word={false} /> {ops.queue.overdue} overdue{ops.queue.approx ? ' · some counts approx.' : ''}</span>
+          <span className="msub"><Led light={ops.queue.overdue ? 'red' : ops.queue.open >= 6 ? 'amber' : 'green'} word={false} /> {ops.queue.overdue} overdue · {ops.queue.dueWithinWeek} due in the next 7 days{ops.queue.approx ? ' · some counts approx.' : ''}</span>
         </button>
         <button className="meter" onClick={go('money')} aria-label={'windowWeeks' in mo && mo.windowWeeks ? `Momentum ${signedPct((mo as any).change)}, ${(mo as any).label}` : 'Momentum: not enough complete weeks'}>
           <span className="label">Momentum</span>

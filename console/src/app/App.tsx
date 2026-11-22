@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Snapshot } from '../shared/schema';
-import { SnapCtx } from './ui';
+import { SnapCtx, labelTime } from './ui';
 import Home from './screens/Home';
 
 const Money = lazy(() => import('./screens/Money'));
@@ -41,6 +41,7 @@ export default function App() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [fallback, setFallback] = useState<{ at: string; reason: string } | null>(null);
   const [more, setMore] = useState(false);
   const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 
@@ -50,30 +51,42 @@ export default function App() {
     return () => removeEventListener('hashchange', on);
   }, []);
 
-  // Serve cached snapshot immediately; if the Worker is rebuilding in the background, poll until it finishes.
+  // Show the saved copy instantly, then read Notion fresh on every open (only what changed) and swap it in.
+  // If Notion can't be reached, keep the saved copy and say how old it is.
   useEffect(() => {
-    let tries = 0;
-    let timer: ReturnType<typeof setTimeout>;
-    let first = true;
-    const load = async () => {
-      try {
-        const r = await fetch(`./api/snapshot${first ? '' : '?continue=1'}`, { cache: 'no-store' });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const body = (await r.json()) as any;
-        const parsed = Snapshot.safeParse(body);
-        if (!parsed.success) throw new Error('Snapshot failed validation');
-        setSnap(parsed.data);
-        const busy = !!body.refreshing || (Array.isArray(body.pending) && body.pending.length > 0);
-        setUpdating(busy);
-        if (busy && tries++ < 12) timer = setTimeout(load, 6000);
-      } catch (e) {
-        setErr(String((e as Error).message));
-        setUpdating(false);
-      }
-      first = false;
+    let alive = true;
+    const get = async (fresh: boolean) => {
+      const r = await fetch(`./api/snapshot${fresh ? '?fresh=1' : ''}`, { cache: 'no-store' });
+      const body = (await r.json().catch(() => ({}))) as any;
+      if (!r.ok) throw new Error(body?.error ?? `HTTP ${r.status}`);
+      const parsed = Snapshot.safeParse(body);
+      if (!parsed.success) throw new Error('Snapshot failed validation');
+      return { snap: parsed.data, body };
     };
-    load();
-    return () => clearTimeout(timer);
+    (async () => {
+      let haveSaved = false;
+      try {
+        const saved = await get(false);
+        if (!alive) return;
+        setSnap(saved.snap);
+        haveSaved = true;
+      } catch { /* no saved copy yet: the fresh read below fills it */ }
+      setUpdating(true);
+      try {
+        for (let pass = 0; pass < 4 && alive; pass++) {
+          const f = await get(true);
+          if (!alive) return;
+          setSnap(f.snap);
+          setFallback(f.body.fallback ? { at: f.body.savedAt ?? f.snap.generatedAt, reason: f.body.fallbackReason ?? '' } : null);
+          if (f.body.fallback || !(Array.isArray(f.body.pending) && f.body.pending.length)) break;
+        }
+      } catch (e) {
+        if (!haveSaved) setErr(String((e as Error).message));
+        else setFallback({ at: '', reason: 'Couldn’t reach the dashboard service' });
+      }
+      if (alive) setUpdating(false);
+    })();
+    return () => { alive = false; };
   }, []);
 
   // Swipe between screens on phone (ignores horizontally scrollable areas).
@@ -114,6 +127,7 @@ export default function App() {
         </nav>
         <main className="main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {updating && <div className="updating" style={{ position: 'fixed', top: embedded ? 62 : 10, right: 14, zIndex: 20 }} role="status"><i />Updating…</div>}
+          {fallback && snap && <div className="banner warn" role="status">▲ <span>Showing saved data from {labelTime(fallback.at || snap.generatedAt)}. {fallback.reason ? `${fallback.reason}. ` : ''}It will refresh the next time you open the dashboard.</span></div>}
           {err && !snap && <div className="banner bad" role="alert">Couldn’t load the snapshot ({err}). Pull to refresh, or open the Command Center in Notion.</div>}
           {!snap ? <Skeleton /> : (
             <Suspense fallback={<Skeleton />}>

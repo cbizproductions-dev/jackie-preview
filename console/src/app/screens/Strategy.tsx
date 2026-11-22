@@ -22,17 +22,16 @@ export default function Strategy() {
         <div className="panel">
           <div className="tbl-wrap"><table className="tbl"><thead><tr><th>Area</th><th>Today</th><th>● Good</th><th>▲ Watch</th><th>■ Act</th></tr></thead>
             <tbody>{lights.map((l) => {
-              const cc = ccHealth.find((h) => h.area === l.area);
-              const differs = cc && cc.state !== l.light && l.light !== 'none';
+              const differs = l.source === 'command_center' && l.computed && l.computed !== 'none' && l.computed !== l.light;
               return (
                 <tr key={l.area}>
                   <td><strong>{l.area}</strong></td>
-                  <td><Led light={l.light} /> <div className="cap">{l.today}{l.note ? ` · ${l.note}` : ''}</div>{differs && <div className="cap" style={{ color: 'var(--warn)' }}>Command Center shows {cc!.state} ({cc!.note})</div>}</td>
+                  <td><Led light={l.light} /> <div className="cap">{l.today}{l.note ? ` · ${l.note}` : ''}</div>{differs && <div className="cap" style={{ color: 'var(--warn)' }}>Live data right now reads {l.computed} ({l.computedToday}); the Command Center updates this light at its 6:47 AM refresh.</div>}</td>
                   <td className="cap">{l.rule.green}</td><td className="cap">{l.rule.amber}</td><td className="cap">{l.rule.red}</td>
                 </tr>
               );
             })}</tbody></table></div>
-          <p className="cap">Thresholds from the Strategy Room. No single blended score. Grey (○) = can’t be computed from the snapshot.</p>
+          <p className="cap">Lights are the Command Center’s own (its daily refresh), so the Dashboard and Notion always match. Thresholds from the Strategy Room. No single blended score.</p>
         </div>
       </Section>
 

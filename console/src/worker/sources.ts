@@ -189,7 +189,7 @@ const discovered = (id: string, name: string, owner: string, title: string, key:
     const ds = await r.findDataSource(title);
     if (!ds) return { data: { [key]: { found: false, url: '', rows: [] } } as any, lastEdited: null };
     const rows = await r.rowsOfDataSource(ds.id);
-    return { data: { [key]: { found: true, url: ds.url, rows: rows.map((x) => map(P_(x), x)) } } as any, lastEdited: ds.lastEdited };
+    return { data: { [key]: { found: true, url: ds.url, dsId: ds.id, rows: rows.map((x) => map(P_(x), x)) } } as any, lastEdited: ds.lastEdited };
   },
 });
 SOURCES.push(
