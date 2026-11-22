@@ -66,6 +66,13 @@ Running log so another Claude session can pick up. Newest first within each sect
 - **Checked live (Nov 22):** whoami = cbizproductions@gmail.com; tail during 4 loads: no errors; full check 20 Notion calls / ~7 s, normal open 1 call / ~1 s; CPU 23–52 ms per fresh request; numbers on screen in 0.4–1.5 s on a phone-size screen, fresh data in 1.4–2.1 s.
   All headline numbers and all 10 lights match the Command Center (as of Sun Nov 22, 11:05 AM ET).
 
+## Apple Calendar live feed (Nov 22, Kris approved)
+- Optional Worker secret `APPLE_CAL_URL` = iCloud "Public Calendar" link(s) (webcal:// or https://, several separated by spaces). Apple Calendar only; Kris doesn't use Google Calendar.
+- Read on every open (at most once a minute), next 60 days, titles and times only (no notes, locations, attendees). Repeats, removed and moved repeats, cancelled events and multi-day all-day events handled (`src/worker/ical.ts`, `tests/apple.test.ts`).
+- Only events the Notion calendar doesn't already have are added, marked "from Apple Calendar". Durango hold applies. Muse's Notion calendar stays the main record.
+- If iCloud fails, the last good copy stays and the source shows as failed. The link is never logged.
+- To stop it: turn off "Public Calendar" on the iPhone, or delete the secret.
+
 ## Open questions / blocked
 1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 
