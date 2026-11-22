@@ -93,7 +93,7 @@ async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response
     await env.SNAP.put(KEYS.state, JSON.stringify(state));
     await env.SNAP.put(KEYS.snapshot, JSON.stringify(snap));
     // No key, token or URL in logs: just the shape of the refresh.
-    console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, appleMs, appleEvents: state.apple?.items.length ?? null, appleError: state.apple?.error ?? null, ms: Date.now() - t0 }));
+    console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, appleMs, appleEvents: state.apple?.items.length ?? null, appleReused: state.apple?.reused ?? null, appleError: state.apple?.error ?? null, ms: Date.now() - t0 }));
     return json({ ...snap, servedFrom: 'live', notionCalls: reader.calls });
   } catch (e) {
     const reason = explainError(String((e as Error).message ?? e));

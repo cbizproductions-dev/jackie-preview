@@ -6,7 +6,7 @@
  */
 
 export type AppleEvent = { date: string; time: string | null; title: string; start: string };
-export type AppleState = { items: AppleEvent[]; readAt: string | null; error?: string | null; calendars?: number; stats?: { events: number; repeating: number; latest: string | null; upcoming?: number; nextStart?: string | null; byMonth?: Record<string, number> } };
+export type AppleState = { items: AppleEvent[]; readAt: string | null; error?: string | null; calendars?: number; stats?: { events: number; repeating: number; latest: string | null; upcoming?: number; nextStart?: string | null }; cache?: { tag: string; day: string; items: AppleEvent[]; stats: any }[]; reused?: number };
 
 const NY = 'America/New_York';
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
@@ -73,7 +73,7 @@ function parseDT(p: Prop): DT | null {
 }
 const dtMs = (t: DT) => (t.allDay ? Date.UTC(t.y, t.m - 1, t.d) : wallToUtc(t.y, t.m, t.d, t.h, t.mi, t.s, t.tz));
 
-type Ev = { uid: string; summary: string; start: DT; end: DT | null; durMs: number | null; rrule: Record<string, string> | null; exdates: Set<string>; recurrenceId: string | null; cancelled: boolean };
+type Ev = { uid: string; summary: string; start: DT; end: DT | null; durMs: number | null; rrule: Record<string, string> | null; exRaw: DT[]; recRaw: DT | null; recurrenceId: string | null; cancelled: boolean };
 
 function dayKeyNY(ms: number) {
   const p = parts(ms, NY);
@@ -101,7 +101,7 @@ function readEvents(text: string): Ev[] {
   let cur: Partial<Ev> | null = null;
   let depth = 0; // skip nested blocks such as VALARM
   for (const line of unfold(text)) {
-    if (line === 'BEGIN:VEVENT') { cur = { exdates: new Set(), rrule: null, recurrenceId: null, cancelled: false, end: null, durMs: null, summary: '', uid: '' }; depth = 0; continue; }
+    if (line === 'BEGIN:VEVENT') { cur = { exRaw: [], recRaw: null, rrule: null, recurrenceId: null, cancelled: false, end: null, durMs: null, summary: '', uid: '' }; depth = 0; continue; }
     if (!cur) continue;
     if (line.startsWith('BEGIN:')) { depth++; continue; }
     if (line.startsWith('END:') && depth > 0) { depth--; continue; }
@@ -119,8 +119,8 @@ function readEvents(text: string): Ev[] {
     else if (p.name === 'DTEND') cur.end = parseDT(p);
     else if (p.name === 'DURATION') cur.durMs = parseDuration(p.value);
     else if (p.name === 'STATUS') cur.cancelled = /CANCELLED/i.test(p.value);
-    else if (p.name === 'RECURRENCE-ID') { const t = parseDT(p); cur.recurrenceId = t ? String(dtMs(t)) : null; }
-    else if (p.name === 'EXDATE') for (const v of p.value.split(',')) { const t = parseDT({ ...p, value: v }); if (t) cur.exdates!.add(String(dtMs(t))); }
+    else if (p.name === 'RECURRENCE-ID') { const t = parseDT(p); cur.recRaw = t; cur.recurrenceId = t ? 'pending' : null; }
+    else if (p.name === 'EXDATE') for (const v of p.value.split(',')) { const t = parseDT({ ...p, value: v }); if (t) cur.exRaw!.push(t); }
     else if (p.name === 'RRULE') cur.rrule = Object.fromEntries(p.value.split(';').map((kv) => kv.split('=')).filter((x) => x.length === 2).map(([k, v]) => [k.toUpperCase(), v]));
   }
   return out;
@@ -180,19 +180,33 @@ function occurrences(ev: Ev, fromMs: number, untilMs: number): DT[] {
 }
 
 /** Events between `fromDay` and `toDay` (inclusive, New York dates). Titles and times only. */
-export function parseIcs(text: string, fromDay: string, toDay: string): AppleEvent[] {
-  const events = readEvents(text);
+const rawDay = (t: DT) => `${t.y}-${pad(t.m)}-${pad(t.d)}`;
+export function parseIcs(input: string | Ev[], fromDay: string, toDay: string): AppleEvent[] {
+  const all = typeof input === 'string' ? readEvents(input) : input;
   const fromMs = Date.parse(`${fromDay}T00:00:00Z`) - 2 * 86400000;
   const toMs = Date.parse(`${toDay}T23:59:59Z`) + 86400000;
-  const overrides = new Set(events.filter((e) => e.recurrenceId && e.uid).map((e) => `${e.uid}|${e.recurrenceId}`));
+  const lo = new Date(fromMs - 86400000).toISOString().slice(0, 10), hi = new Date(toMs + 86400000).toISOString().slice(0, 10);
+  // Cheap date-string filter first, so years of old events cost almost nothing (no time-zone maths).
+  const events = all.filter((ev) => {
+    if (ev.rrule && !ev.recRaw) {
+      const u = /^(\d{4})(\d{2})(\d{2})/.exec(ev.rrule.UNTIL ?? '');
+      return !(u && `${u[1]}-${u[2]}-${u[3]}` < lo) && rawDay(ev.start) <= hi;
+    }
+    const startDay = rawDay(ev.recRaw ?? ev.start);
+    const endDay = ev.end ? rawDay(ev.end) : startDay;
+    return !(endDay < lo || rawDay(ev.start) > hi) || (!!ev.recRaw && startDay >= lo && startDay <= hi);
+  });
+  for (const ev of events) if (ev.recRaw) ev.recurrenceId = String(dtMs(ev.recRaw));
+  const overrides = new Set(events.filter((e) => e.recRaw && e.uid).map((e) => `${e.uid}|${e.recurrenceId}`));
   const out: AppleEvent[] = [];
   for (const ev of events) {
     if (ev.cancelled || !ev.summary) continue;
+    const exdates = new Set(ev.rrule ? ev.exRaw.map((t) => String(dtMs(t))) : []);
     const durMs = ev.end ? dtMs(ev.end) - dtMs(ev.start) : ev.durMs ?? (ev.start.allDay ? 86400000 : 0);
     const starts = ev.rrule && !ev.recurrenceId ? occurrences(ev, fromMs, toMs) : [ev.start];
     for (const st of starts) {
       const ms = dtMs(st);
-      if (ev.rrule && !ev.recurrenceId && (ev.exdates.has(String(ms)) || overrides.has(`${ev.uid}|${ms}`))) continue;
+      if (ev.rrule && !ev.recurrenceId && (exdates.has(String(ms)) || overrides.has(`${ev.uid}|${ms}`))) continue;
       const endMs = ms + durMs;
       if (endMs < fromMs || ms > toMs) continue;
       if (st.allDay) {
@@ -226,31 +240,56 @@ export function sameEvent(appleTitle: string, notionTitle: string): boolean {
 }
 
 /** Download every shared calendar in the secret. Keeps the last good copy if iCloud can't be reached. */
+type CalStats = { events: number; repeating: number; latest: string | null; upcoming: number; nextStart: string | null };
+type CalCache = { tag: string; day: string; items: AppleEvent[]; stats: CalStats };
+
+async function fingerprint(res: Response, text: string): Promise<string> {
+  const etag = res.headers.get('etag');
+  if (etag) return `etag:${etag}`;
+  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+  return `sha1:${[...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/** Download every shared calendar in the secret. Unchanged calendars aren't parsed again the same day. Keeps the last good copy if iCloud can't be reached. */
 export async function readApple(urls: string, today: string, toDay: string, prev: AppleState | undefined, fetchImpl: typeof fetch = fetch): Promise<AppleState> {
   const list = urls.split(/[\s,]+/).map((u) => u.trim().replace(/^webcal:\/\//i, 'https://')).filter((u) => /^https:\/\//i.test(u));
   if (!list.length) return { items: prev?.items ?? [], readAt: prev?.readAt ?? null, error: 'The Apple Calendar link isn’t a valid webcal:// or https:// link' };
   try {
     const items: AppleEvent[] = [];
-    const stats = { events: 0, repeating: 0, latest: null as string | null, upcoming: 0, nextStart: null as string | null, byMonth: {} as Record<string, number> };
-    for (const u of list) {
+    const stats: CalStats = { events: 0, repeating: 0, latest: null, upcoming: 0, nextStart: null };
+    const cache: CalCache[] = [];
+    let reused = 0;
+    for (const [i, u] of list.entries()) {
       const res = await fetchImpl(u, { headers: { Accept: 'text/calendar' }, signal: AbortSignal.timeout(8000) });
       if (!res.ok) throw new Error(`Apple Calendar answered ${res.status}${res.status === 404 ? ' (the calendar may no longer be public)' : ''}`);
       const text = await res.text();
       if (!/BEGIN:VCALENDAR/.test(text)) throw new Error('Apple Calendar link didn’t return a calendar');
-      items.push(...parseIcs(text, today, toDay));
-      for (const ev of readEvents(text)) {
-        stats.events++;
-        if (ev.rrule) stats.repeating++;
-        const d = `${ev.start.y}-${pad(ev.start.m)}-${pad(ev.start.d)}`;
-        if (!stats.latest || d > stats.latest) stats.latest = d;
-        stats.byMonth[d.slice(0, 7)] = (stats.byMonth[d.slice(0, 7)] ?? 0) + 1;
-        if (d >= today) { stats.upcoming++; if (!stats.nextStart || d < stats.nextStart) stats.nextStart = d; }
+      const tag = await fingerprint(res, text);
+      const old = prev?.calendars === list.length ? prev?.cache?.[i] : undefined;
+      let c: CalCache;
+      if (old && old.tag === tag && old.day === today) { c = old; reused++; }
+      else {
+        const evs = readEvents(text);
+        const st: CalStats = { events: 0, repeating: 0, latest: null, upcoming: 0, nextStart: null };
+        for (const ev of evs) {
+          st.events++;
+          if (ev.rrule) st.repeating++;
+          const d = `${ev.start.y}-${pad(ev.start.m)}-${pad(ev.start.d)}`;
+          if (!st.latest || d > st.latest) st.latest = d;
+          if (d >= today) { st.upcoming++; if (!st.nextStart || d < st.nextStart) st.nextStart = d; }
+        }
+        c = { tag, day: today, items: parseIcs(evs, today, toDay), stats: st };
       }
+      cache.push(c);
+      items.push(...c.items);
+      stats.events += c.stats.events; stats.repeating += c.stats.repeating; stats.upcoming += c.stats.upcoming;
+      if (c.stats.latest && (!stats.latest || c.stats.latest > stats.latest)) stats.latest = c.stats.latest;
+      if (c.stats.nextStart && (!stats.nextStart || c.stats.nextStart < stats.nextStart)) stats.nextStart = c.stats.nextStart;
     }
     items.sort((a, b) => a.start.localeCompare(b.start));
-    return { items, readAt: new Date().toISOString(), error: null, calendars: list.length, stats };
+    return { items, readAt: new Date().toISOString(), error: null, calendars: list.length, stats, cache, reused };
   } catch (e) {
     const msg = String((e as Error).message ?? e).replace(/https?:\/\/\S+/g, '[link]');
-    return { items: prev?.items ?? [], readAt: prev?.readAt ?? null, error: msg, calendars: list.length };
+    return { items: prev?.items ?? [], readAt: prev?.readAt ?? null, error: msg, calendars: list.length, cache: prev?.cache, stats: prev?.stats };
   }
 }
