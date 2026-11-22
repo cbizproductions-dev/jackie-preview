@@ -1,7 +1,9 @@
 import { NotionReader } from './notion';
+import { sameEvent, type AppleState } from './ical';
+import { tagItem } from './parsers';
 import { SOURCES, readCabinet } from './sources';
 import { Snapshot, type SourceState, type DataIssue } from '../shared/schema';
-import { consoleConflicts, freshnessOf } from '../shared/derive';
+import { consoleConflicts, freshnessOf, isDurango } from '../shared/derive';
 import { nyDate } from '../shared/time';
 
 /** Turn a Notion API failure into a sentence Kris can act on. Never includes the token. */
@@ -25,7 +27,7 @@ export type SrcState = {
   /** Data is the build-time capture, not a live read yet. */
   fromSeed?: boolean;
 };
-export type State = { sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null; /** Time of the last completed change check. */ sweptAt?: string | null };
+export type State = { apple?: AppleState; sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null; /** Time of the last completed change check. */ sweptAt?: string | null };
 
 export const KEYS = { state: 'state:v1', snapshot: 'snapshot:v1', seed: 'seed:v1', seedState: 'seed-state:v1', lock: 'lock:v1' } as const;
 export const STALE_AFTER_MS = 15 * 60 * 1000;
@@ -187,6 +189,14 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
   const lastDaily = (merged.maintenance as Snapshot['maintenance']).find((r) => r.type === 'Daily');
   sources.push({ id: 'refresh', name: 'Command Center daily refresh', owner: 'Claude', kind: 'database', url: 'https://app.notion.com/p/41e8b67fa84e81a4aa3ade6a1840e3db', lastEdited: lastDaily?.date ?? null, readAt: null, state: lastDaily?.date && (Date.parse(today) - Date.parse(lastDaily.date)) / 86400000 <= 2 ? 'fresh' : 'stale', note: lastDaily ? `${lastDaily.result}: ${lastDaily.run}` : 'No daily run on file' });
 
+  // Apple Calendar live feed: add anything the Notion calendar hasn't caught yet (titles and times only).
+  if (st.apple) {
+    const added = mergeApple(merged.calendar as Snapshot['calendar'], st.apple, today);
+    const ok = !st.apple.error;
+    if (!ok) failed.push('Apple Calendar (live feed)');
+    sources.push({ id: 'apple', name: 'Apple Calendar (live feed)', owner: 'Kris', kind: 'page', url: 'https://www.icloud.com/calendar/', lastEdited: st.apple.readAt, readAt: st.apple.readAt, state: ok ? 'fresh' : 'failed', note: ok ? `Read live on open · ${st.apple.items.length} events in the next 60 days · ${added} not on the Notion calendar yet` : `${st.apple.error}${st.apple.items.length ? ' — showing the last good copy' : ''}` });
+  }
+
   merged.members = st.members ?? [];
   const snap = {
     ...merged, schemaVersion: 1, generatedAt: nowIso, today, mode, state: failed.length ? 'partial' : 'ok', failed, sources, issues: [] as DataIssue[],
@@ -196,4 +206,22 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     .map((i) => ({ title: i.title, sources: i.source.split(/;\s*/).filter(Boolean), detail: i.observation, url: i.url, origin: 'intelligence_feed' as const }));
   snap.issues = [...fromFeed, ...consoleConflicts(snap, weekLine, openLine)];
   return Snapshot.parse(snap);
+}
+
+/** Adds Apple Calendar events the Notion calendar doesn't have yet. Returns how many were added. Durango hold applies. */
+export function mergeApple(cal: Snapshot['calendar'], apple: AppleState, today: string): number {
+  let added = 0;
+  for (const ev of apple.items) {
+    if (ev.date < today || isDurango(ev.title)) continue;
+    let day = cal.days.find((d) => d.date === ev.date);
+    if (day?.items.some((i) => sameEvent(ev.title, i.title))) continue;
+    if (!day) {
+      day = { date: ev.date, items: [] };
+      cal.days.push(day);
+    }
+    day.items.push({ time: ev.time, title: ev.title, tags: tagItem(ev.title), userReported: false, tentative: false, apple: true });
+    added++;
+  }
+  cal.days.sort((a, b) => a.date.localeCompare(b.date));
+  return added;
 }

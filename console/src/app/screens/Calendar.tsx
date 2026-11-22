@@ -22,7 +22,7 @@ export default function Calendar() {
                 {d.items.length ? d.items.map((it, i) => (
                   <div key={i} style={{ marginBottom: 6 }}>
                     <div><strong>{it.title.replace(/\s*\(user-reported.*\)/i, '')}</strong></div>
-                    <div className="cap">{it.time ?? ''}{it.tentative ? ' · tentative' : ''}{it.userReported ? ' · user-reported' : ''} {it.tags.filter((t) => t !== 'personal').map((t) => <span key={t} className="pill gold" style={{ marginLeft: 4 }}>{t}</span>)}</div>
+                    <div className="cap">{it.time ?? ''}{it.tentative ? ' · tentative' : ''}{it.userReported ? ' · user-reported' : ''}{it.apple ? ' · from Apple Calendar' : ''} {it.tags.filter((t) => t !== 'personal').map((t) => <span key={t} className="pill gold" style={{ marginLeft: 4 }}>{t}</span>)}</div>
                   </div>
                 )) : <span className="cap">No events</span>}
               </div>

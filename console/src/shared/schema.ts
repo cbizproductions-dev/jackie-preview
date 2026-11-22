@@ -152,6 +152,8 @@ export const CalItem = z.object({
   tags: z.array(z.enum(['session', 'vibe', 'mix', 'brief', 'contract', 'speaking', 'sync', 'holiday', 'personal'])),
   userReported: z.boolean(),
   tentative: z.boolean(),
+  /** Came straight from Kris's Apple Calendar feed; not on the Notion calendar yet. */
+  apple: z.boolean().optional(),
 });
 export const CalDay = z.object({ date: z.string(), items: z.array(CalItem) });
 export type CalDay = z.infer<typeof CalDay>;

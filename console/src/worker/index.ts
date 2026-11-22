@@ -3,6 +3,8 @@
  * Everything lives under /c/<ACCESS_KEY>/ ; any other path (or a wrong key) is a plain 404.
  */
 import { NotionReader } from './notion';
+import { readApple } from './ical';
+import { nyDate, addDays } from '../shared/time';
 import { EMBEDDED } from 'cbiz-assets';
 import { summaryText } from './summary';
 import { refreshPass, assemble, KEYS, explainError, type State } from './snapshot';
@@ -13,6 +15,8 @@ export interface Env {
   ACCESS_KEY: string;
   NOTION_TOKEN?: string;
   NOTION_CALL_BUDGET?: string;
+  /** iCloud "Public Calendar" link(s), secret. Optional. */
+  APPLE_CAL_URL?: string;
 }
 
 const FRAME_ANCESTORS = "'self' https://www.notion.so https://notion.so https://*.notion.so https://notion.com https://www.notion.com https://app.notion.com https://*.notion.com https://*.notion.site";
@@ -70,11 +74,22 @@ async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response
     }
     const now = new Date();
     const { state, pending, mode, changed } = await refreshPass(reader, prev, { budget: Number(env.NOTION_CALL_BUDGET ?? 40), now });
+    // Apple Calendar: read on every open (at most once a minute), keep the last good copy if iCloud is down.
+    let appleMs: number | null = null;
+    if (env.APPLE_CAL_URL) {
+      const last = prev.apple?.readAt ? Date.parse(prev.apple.readAt) : 0;
+      if (now.getTime() - last > 60_000 || prev.apple?.error) {
+        const ta = Date.now();
+        const today = nyDate(now);
+        state.apple = await readApple(env.APPLE_CAL_URL, today, addDays(today, 60), prev.apple);
+        appleMs = Date.now() - ta;
+      } else state.apple = prev.apple;
+    } else delete state.apple;
     const snap = { ...assemble(state, now, 'live'), pending };
     await env.SNAP.put(KEYS.state, JSON.stringify(state));
     await env.SNAP.put(KEYS.snapshot, JSON.stringify(snap));
     // No key, token or URL in logs: just the shape of the refresh.
-    console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, ms: Date.now() - t0 }));
+    console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, appleMs, appleEvents: state.apple?.items.length ?? null, appleError: state.apple?.error ?? null, ms: Date.now() - t0 }));
     return json({ ...snap, servedFrom: 'live', notionCalls: reader.calls });
   } catch (e) {
     const reason = explainError(String((e as Error).message ?? e));
