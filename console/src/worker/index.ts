@@ -4,6 +4,7 @@
  */
 import { NotionReader } from './notion';
 import { readApple } from './ical';
+import { updateChanges } from './changes';
 import { nyDate, addDays } from '../shared/time';
 import { EMBEDDED } from 'cbiz-assets';
 import { summaryText } from './summary';
@@ -85,7 +86,10 @@ async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response
         appleMs = Date.now() - ta;
       } else state.apple = prev.apple;
     } else delete state.apple;
-    const snap = { ...assemble(state, now, 'live'), pending };
+    const assembled = assemble(state, now, 'live');
+    // Since last update: compare this read with the last one (no Notion calls, stored in the same state record).
+    state.changes = updateChanges(prev.changes, assembled, now);
+    const snap = { ...assembled, changes: { baselineAt: state.changes.baselineAt, events: state.changes.events }, pending };
     await env.SNAP.put(KEYS.state, JSON.stringify(state));
     await env.SNAP.put(KEYS.snapshot, JSON.stringify(snap));
     // No key, token or URL in logs: just the shape of the refresh.

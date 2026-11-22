@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSnap, money, pct, signedPct, Ladder, Spark, Led, Section, Count, labelTime, day, SourceBadge, Empty, lightWord, Header } from '../ui';
 import { CCHeadline, CCBrief, CCFacts } from '../cc';
+import { SinceLastUpdate } from '../since';
 import { goalTargets, thisWeekMetric, yearMetrics, todaysMoves, healthLights, ROOMS, studioOps, monthMetrics, currentWeek } from '../../shared/derive';
 import { momentum, weekCash, weekStatus } from '../../shared/rules';
 import { labelDay, addDays, weekStart } from '../../shared/time';
@@ -86,6 +87,8 @@ export default function Home() {
           </ol>
         ) : <Empty>Nothing overdue, owed or due in the next 7 days.</Empty>}
       </Section>
+
+      <SinceLastUpdate />
 
       <CCBrief />
 

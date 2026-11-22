@@ -1,6 +1,7 @@
 import { NotionReader } from './notion';
 import { sameEvent, type AppleState } from './ical';
 import { tagItem } from './parsers';
+import type { ChangeState } from './changes';
 import { SOURCES, readCabinet } from './sources';
 import { Snapshot, type SourceState, type DataIssue } from '../shared/schema';
 import { consoleConflicts, freshnessOf, isDurango } from '../shared/derive';
@@ -27,7 +28,7 @@ export type SrcState = {
   /** Data is the build-time capture, not a live read yet. */
   fromSeed?: boolean;
 };
-export type State = { apple?: AppleState; sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null; /** Time of the last completed change check. */ sweptAt?: string | null };
+export type State = { changes?: ChangeState; apple?: AppleState; sources: Record<string, SrcState>; members?: Snapshot['members']; membersAt?: string | null; /** Time of the last completed change check. */ sweptAt?: string | null };
 
 export const KEYS = { state: 'state:v1', snapshot: 'snapshot:v1', seed: 'seed:v1', seedState: 'seed-state:v1', lock: 'lock:v1' } as const;
 export const STALE_AFTER_MS = 15 * 60 * 1000;

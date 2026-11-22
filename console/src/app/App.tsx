@@ -7,6 +7,7 @@ const Money = lazy(() => import('./screens/Money'));
 const Studio = lazy(() => import('./screens/Studio'));
 const Beats = lazy(() => import('./screens/Beats'));
 const Sync = lazy(() => import('./screens/Sync'));
+const Creative = lazy(() => import('./screens/Creative'));
 const Contracts = lazy(() => import('./screens/Contracts'));
 const Strategy = lazy(() => import('./screens/Strategy'));
 const Career = lazy(() => import('./screens/Career'));
@@ -21,6 +22,7 @@ export const SCREENS = [
   { id: 'studio', name: 'Studio', C: Studio },
   { id: 'sync', name: 'Sync', C: Sync },
   { id: 'beats', name: 'Beats', C: Beats },
+  { id: 'creative', name: 'Creative', C: Creative },
   { id: 'contracts', name: 'Contracts', C: Contracts },
   { id: 'strategy', name: 'Strategy', C: Strategy },
   { id: 'career', name: 'Career', C: Career },

@@ -252,5 +252,14 @@ export const Snapshot = z.object({
   /** Screen-print header art (traced from Kris's own photos), read from the runbook page. */
   art: z.record(z.object({ w: z.number(), h: z.number(), paths: z.string() })).default({}),
   cc: CommandCenterData,
+  /** "Since last update": business changes found between fresh reads (see src/worker/changes.ts). */
+  changes: z.object({
+    baselineAt: z.string(),
+    events: z.array(z.object({
+      key: z.string(), seenAt: z.string(), recordDate: z.string().nullable(),
+      kind: z.string(), title: z.string(), detail: z.string(), priority: z.number(),
+      tone: z.enum(['ok', 'warn', 'bad', 'info']), source: z.string(), url: z.string(),
+    })),
+  }).optional(),
 });
 export type Snapshot = z.infer<typeof Snapshot>;

@@ -77,6 +77,14 @@ Running log so another Claude session can pick up. Newest first within each sect
 - `src/app/cc.tsx` shows the Command Center's own words from data.json, unshortened and labelled with its "as of" time: Home (headline, Today's brief, Interesting facts), each room's summary + all strip stats (Money, Studio, Beats, Sync, Contracts, Strategy, Career), Money on the table, CC pace + illustrative set-aside, counting footnote, recommended moves, experiments in detail + ideas, ROI read, eras and streaks, vibe funnel, week-ahead notes (Calendar). Agent view gets the headline, brief, facts, moves and room insights.
 - Durango hold filters every line. No extra Notion calls (data.json is already read).
 
+## Creative Output + Since Last Update (Nov 22)
+- **Creative screen** (`src/app/screens/Creative.tsx`, logic in `src/shared/creative.ts`): from the Brief Board, Studio Board, Weekly Scorecard and Beat Leases. No new tracker.
+  Stage counts use each brief's current status and match the Command Center's own Brief Board counts (checked against data.json `rooms.briefs`). Briefs are dated by Due.
+  "Tracks completed" is Not on file (tracks made outside a brief aren't logged). Titles are counted only where the record names them. Styles come only from words in brief titles. Placements on file (BMI + TuneSat) are shown separately as a different count.
+- **Since last update** (`src/worker/changes.ts`, panel `src/app/since.tsx` on Home after Today's moves): each fresh read is compared with the last one, stored inside `state:v1` (no new KV key, no schedule, no Notion calls).
+  Only verified changes: money in, Brief Board stage moves, bookings, new paying clients, deliveries, newly overdue mixes, overdue cleared, goals reached, data issues closed, Command Center light changes. Ranked by business importance. No repeats; 30 days kept.
+  A category is compared only when its source read OK both times. Old back-filled briefs aren't news. The first run set a baseline and listed only records with their own recent date. "New" = since this device's last visit (browser storage, per device).
+
 ## Open questions / blocked
 1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 
