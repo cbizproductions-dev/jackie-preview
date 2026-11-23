@@ -4,6 +4,7 @@ import { useSnap, Section, Empty, money, useWidth } from './ui';
 import { syncMonthly, syncWeekly } from '../shared/synctraj';
 import { labelDay } from '../shared/time';
 import { isDurango } from '../shared/derive';
+import { maestroPrompt } from '../shared/maestro';
 
 const short = (d: string) => labelDay(d, { month: 'short', day: 'numeric' });
 const idOf = (u: string) => (u.split('/').pop() ?? '').replace(/-/g, '').split('?')[0];
@@ -15,8 +16,8 @@ export function SyncWeek5() {
   const items = (w?.items ?? []).filter((x) => !isDurango(`${x.name} ${x.company}`));
   if (!items.length) return null;
   const status = (row: string) => s.syncContacts.find((c) => idOf(c.url) === idOf(row))?.status ?? '';
-  const copy = async (email: string) => {
-    try { await navigator.clipboard.writeText(email); setCopied(email); setTimeout(() => setCopied(null), 1800); } catch { /* clipboard blocked: the address is still visible */ }
+  const copy = async (key: string, text: string) => {
+    try { await navigator.clipboard.writeText(text); setCopied(key); setTimeout(() => setCopied(null), 1800); } catch { /* clipboard blocked: the text is still visible to select */ }
   };
   return (
     <Section title="This week’s 5" right={<span className="cap">{w?.week_label ?? ''}</span>}>
@@ -32,9 +33,20 @@ export function SyncWeek5() {
                   <span>{sent ? <span className="pill ok">✓ sent{/replied/i.test(st) ? ' · replied' : ''}</span> : <span className="pill">{x.type}</span>}</span>
                 </div>
                 <div className="cap">{x.company}{sent ? ` · ${x.type}` : ''}</div>
-                <button className="w5-email" onClick={() => copy(x.email)} aria-label={`Copy ${x.email}`}>{copied === x.email ? 'Copied ✓' : x.email} <span aria-hidden="true">⧉</span></button>
+                <button className="w5-email" onClick={() => copy(`e:${x.email}`, x.email)} aria-label={`Copy ${x.email}`}>{copied === `e:${x.email}` ? 'Copied ✓' : x.email} <span aria-hidden="true">⧉</span></button>
                 <div className="sub">{x.how}</div>
                 {x.row && <a className="link-sm" href={x.row} target="_blank" rel="noopener noreferrer">Tracker row ↗</a>}
+                {!sent && (() => {
+                  const prompt = maestroPrompt(x, w?.week_label);
+                  const key = `p:${x.row || x.email}`;
+                  return (
+                    <details className="w5-prompt">
+                      <summary>Prompt for Maestro{/draft ready/i.test(st) ? ' · draft ready' : ''}</summary>
+                      <pre tabIndex={0} aria-label={`Prompt for Maestro about ${x.name}`}>{prompt}</pre>
+                      <button className="w5-email" onClick={() => copy(key, prompt)}>{copied === key ? 'Copied ✓ paste it to Maestro' : 'Copy prompt for Maestro'} <span aria-hidden="true">⧉</span></button>
+                    </details>
+                  );
+                })()}
               </div>
             </div>
           );

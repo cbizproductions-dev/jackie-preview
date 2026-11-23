@@ -169,3 +169,18 @@ describe('Scout replies waiting on Kris', () => {
     expect(waitingOnKris({ reply: 'Asked for the price list', nextAction: '' })).toBe(true);
   });
 });
+
+describe('Prompt for Maestro', async () => {
+  const { maestroPrompt } = await import('../src/shared/maestro');
+  it('never names a template or playlist, tailors only to the stated ask, keeps the tracker rules', () => {
+    const p = maestroPrompt({ name: 'Lib X', company: 'Label Y', type: 'Library', email: 'x@y.test', how: 'Streaming link only, no files.', row: 'https://app.notion.com/p/abc' }, 'Mon Nov 23 – Sun Nov 29');
+    expect(p).not.toMatch(/template|playlist/i);
+    expect(p).toContain('your usual system');
+    expect(p).toContain('- Streaming link only, no files.');
+    expect(p).toContain('x@y.test');
+    expect(p).toContain('https://app.notion.com/p/abc');
+    expect(p).toMatch(/Durango hold/);
+    expect(p).toMatch(/Draft ready/);
+    expect(maestroPrompt({ name: 'S', company: '', type: 'Supervisor', email: 's@t.test', how: '', row: '' })).toContain('send it the way you normally would');
+  });
+});
