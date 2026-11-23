@@ -268,7 +268,7 @@ export function HBars({ rows, fmt = (n: number) => String(n), color = 'var(--lan
           <span style={{ height: 12, background: 'var(--well)', borderRadius: 3 }}>
             <span style={{ display: 'block', height: '100%', width: `${((r.v ?? 0) / max) * 100}%`, minWidth: r.v ? 3 : 0, background: r.color ?? color, borderRadius: 3 }} />
           </span>
-          <span className="num" style={{ fontSize: 13 }}>{r.v == null ? NOT_ON_FILE : fmt(r.v)}{r.note ? <span className="cap"> {r.note}</span> : null}</span>
+          <span className="num" style={{ fontSize: '0.875rem' }}>{r.v == null ? NOT_ON_FILE : fmt(r.v)}{r.note ? <span className="cap"> {r.note}</span> : null}</span>
         </div>
       ))}
     </div>

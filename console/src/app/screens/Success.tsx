@@ -1,4 +1,5 @@
 import React from 'react';
+import { emph } from '../emph';
 import { useSnap, Header, Section, Empty, Led } from '../ui';
 import { ROOMS, isDurango } from '../../shared/derive';
 import { labelDay } from '../../shared/time';
@@ -13,7 +14,7 @@ function Cards({ items, cols = 'g2' }: { items: Item[]; cols?: string }) {
       {items.filter(ok).map((x, i) => (
         <div className="panel" key={i}>
           {x.title && <div className="mid" style={{ fontSize: 17 }}>{x.title}</div>}
-          {x.body && <p className="sub" style={{ margin: '6px 0' }}>{x.body}</p>}
+          {x.body && <p className="sub" style={{ margin: '6px 0' }}>{emph(x.body)}</p>}
           {x.why && <p className="cap" style={{ margin: '4px 0', color: 'var(--gold-hi)' }}>For you: {x.why}</p>}
           {x.source && (x.url
             ? <a className="link-sm" href={x.url} target="_blank" rel="noopener noreferrer">{x.source}{x.date ? ` · ${when(x.date)}` : ''} ↗</a>
@@ -42,7 +43,7 @@ export default function Success() {
         <div className="grid g2">
           <div className="panel">
             <div className="label">This stretch</div>
-            {wins.length ? <ul className="cc-list">{wins.filter((w) => !isDurango(w)).map((w, i) => <li key={i}>{w}</li>)}</ul> : <Empty>No wins listed in today’s brief.</Empty>}
+            {wins.length ? <ul className="cc-list">{wins.filter((w) => !isDurango(w)).map((w, i) => <li key={i}>{emph(w)}</li>)}</ul> : <Empty>No wins listed in today’s brief.</Empty>}
           </div>
           <div className="panel">
             <div className="label">Verified turning points</div>

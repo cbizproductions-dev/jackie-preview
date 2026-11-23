@@ -1,4 +1,5 @@
 import React from 'react';
+import { emph } from '../emph';
 import { useSnap, Header, Section, money, pct, Fold, Empty, Led, day, shortDay, HBars, Math_ } from '../ui';
 import { CCRoom, CCFunnel } from '../cc';
 import { ROOMS, studioOps, rebookCandidates, goalTargets } from '../../shared/derive';
@@ -80,7 +81,7 @@ export default function Studio() {
             if (!xs.length) return null;
             return (
               <Fold key={g} title={`${label} (${xs.length})`}>
-                {xs.map((a) => <div className="row" key={a.name} style={{ gridTemplateColumns: '1fr' }}><span className="t"><strong>{a.name}</strong><div className="cap">{a.note}</div></span></div>)}
+                {xs.map((a) => <div className="row" key={a.name} style={{ gridTemplateColumns: '1fr' }}><span className="t"><strong>{a.name}</strong><div className="cap">{emph(a.note)}</div></span></div>)}
               </Fold>
             );
           }) : <Empty>No artist profiles on the Studio Board right now.</Empty>}
@@ -140,10 +141,10 @@ export default function Studio() {
           <div className="panel" style={{ gridColumn: 'span 1' }}>
             <div className="label">Client concentration</div>
             <div className="mid">{pct(conc.share)}</div>
-            <svg className="chart" viewBox="0 0 300 30" role="img" aria-label={`Top 2 clients ${pct(conc.share)} of session revenue; thresholds 40% and 65%`}>
+            <svg className="chart" viewBox="0 0 300 40" role="img" aria-label={`Top 2 clients ${pct(conc.share)} of session revenue; thresholds 40% and 65%`}>
               <rect x="0" y="8" width="300" height="12" rx="3" fill="var(--well)" />
               <rect x="0" y="8" width={300 * (conc.share ?? 0)} height="12" rx="3" fill={(conc.share ?? 0) > 0.65 ? 'var(--bad)' : (conc.share ?? 0) >= 0.4 ? 'var(--warn)' : 'var(--ok)'} />
-              {[0.4, 0.65].map((x) => <g key={x}><line x1={300 * x} x2={300 * x} y1="2" y2="26" stroke="var(--ink)" strokeWidth="2" /><text x={300 * x} y="30" textAnchor="middle" fontSize="9">{x * 100}%</text></g>)}
+              {[0.4, 0.65].map((x) => <g key={x}><line x1={300 * x} x2={300 * x} y1="2" y2="24" stroke="var(--ink)" strokeWidth="2" /><text x={300 * x} y="39" textAnchor="middle" fontSize="9">{x * 100}%</text></g>)}
             </svg>
             <div className="cap">Top 2 ({conc.names.join(' + ')}) = {money(conc.top2)} of {money(conc.total)}</div>
           </div>

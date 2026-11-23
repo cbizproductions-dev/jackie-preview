@@ -4,6 +4,7 @@
  * Durango hold applies to every line.
  */
 import React from 'react';
+import { emph } from './emph';
 import { useSnap, Section, Led } from './ui';
 import { isDurango } from '../shared/derive';
 
@@ -36,7 +37,7 @@ export function CCRoom({ room, insight, title = 'From the Command Center' }: { r
       <div className="panel cc-room" style={strip?.accent ? { borderLeft: `3px solid ${strip.accent}` } : undefined}>
         {strip && <div className="label">{strip.kicker}</div>}
         {strip && <div className="mid" style={{ fontSize: 20, marginTop: 2 }}>{strip.title}</div>}
-        {ok(text) && <p className="cc-say">{text}</p>}
+        {ok(text) && <p className="cc-say">{emph(text)}</p>}
         {strip && (
           <div className="cc-stats">
             {arr<Stat>(strip.stats).filter((x) => ok(x.l) && !isDurango(`${x.v} ${x.n ?? ''}`)).map((x) => (
@@ -77,7 +78,7 @@ export function CCBrief() {
         {groups.map((g) => (
           <div className="panel" key={g.title}>
             <div className="strip-row"><strong>{g.title}</strong><Led light={toneLight(g.tone)} word={false} /></div>
-            <ul className="cc-list">{g.items.map((i, k) => <li key={k}>{i}</li>)}</ul>
+            <ul className="cc-list">{g.items.map((i, k) => <li key={k}>{emph(i)}</li>)}</ul>
           </div>
         ))}
       </div>
@@ -97,7 +98,7 @@ export function CCFacts() {
           <div className="panel cc-fact" key={i} style={{ borderLeft: `3px solid ${typeof f[3] === 'string' ? f[3] : 'var(--hair-2)'}` }}>
             <div className="cc-big">{String(f[0])}</div>
             <div className="mid" style={{ fontSize: 17 }}>{String(f[1])}</div>
-            {ok(f[2]) && <div className="sub" style={{ marginTop: 4 }}>{f[2]}</div>}
+            {ok(f[2]) && <div className="sub" style={{ marginTop: 4 }}>{emph(f[2])}</div>}
           </div>
         ))}
       </div>
@@ -117,7 +118,7 @@ export function CCMoneyOnTable() {
           <div className="panel cc-fact" key={i} style={{ borderLeft: `3px solid ${typeof r[3] === 'string' ? r[3] : 'var(--hair-2)'}` }}>
             <div className="cc-big">{String(r[0])}</div>
             <div className="mid" style={{ fontSize: 17 }}>{String(r[1])}</div>
-            {ok(r[2]) && <div className="sub" style={{ marginTop: 4 }}>{r[2]}</div>}
+            {ok(r[2]) && <div className="sub" style={{ marginTop: 4 }}>{emph(r[2])}</div>}
           </div>
         ))}
       </div>
@@ -169,7 +170,7 @@ export function CCMoves() {
       <div className="panel">
         {moves.map((m, i) => (
           <div className="row" key={i} style={{ gridTemplateColumns: '1fr' }}>
-            <div className="t"><span className={`pill ${m.urgency === 'Now' ? 'bad' : m.urgency === 'This week' ? 'warn' : ''}`}>{m.urgency}</span> <strong>{m.title}</strong><div className="sub">{m.action}</div></div>
+            <div className="t"><span className={`pill ${m.urgency === 'Now' ? 'bad' : m.urgency === 'This week' ? 'warn' : ''}`}>{m.urgency}</span> <strong>{m.title}</strong><div className="sub">{emph(m.action)}</div></div>
           </div>
         ))}
       </div>
@@ -277,7 +278,7 @@ export function CCNext7() {
         {days.map((d) => (
           <div className="row" key={d.d} style={{ gridTemplateColumns: '1fr' }}>
             <div className="t"><Led light={toneLight(d.tone)} word={false} /> <strong>{d.d}</strong>
-              <ul className="cc-list">{d.items.map((i, k) => <li key={k}>{i}</li>)}</ul>
+              <ul className="cc-list">{d.items.map((i, k) => <li key={k}>{emph(i)}</li>)}</ul>
             </div>
           </div>
         ))}

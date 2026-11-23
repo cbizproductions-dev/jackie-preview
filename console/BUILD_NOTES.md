@@ -98,6 +98,13 @@ Running log so another Claude session can pick up. Newest first within each sect
 - Follow-ups screen removed at Kris's request; replaced in More by **Success**: "Your wins" (live from the Command Center: Wins in today's brief + verified turning points) and researched sections (lessons from his own numbers, words to work by, success stories, music business landscape, sync landscape, stay ahead of the curve). The researched content lives in KV `success:v1` (kept out of this public repo because it quotes his numbers); every outside fact links its source, forecasts and single surveys are labelled. Refreshed on request; no schedule.
 - Maestro prompt: no template or playlist named; holds kept to one line ("Durango hold, and anyone you've been told not to contact or to hold off on").
 
+## Readability pass (Nov 23)
+- Typography and colour only, in rem (browser zoom/text size respected), as one block at the end of `app.css`. Smallest text 14px on phone and 15px on desktop; sub-lines 15/16px; main lines 17/18px; caps labels up a step; body line-height 1.45. Meter numbers unchanged. Same three fonts.
+- Information grey moved from `--ink-3` to `--ink-2`; `--ink-3` kept for timestamps and source lines. All text ≥ 4.5:1.
+- `src/app/emph.tsx`: numbers, money, dates and times inside sentences render in IBM Plex Mono (tabular, brighter, heavier); status words (overdue, past due, due today, expected, booked, delivered, ✓ sent, hot) semibold and tinted, word always kept. Used in Today's moves, Since last update, Command Center text, Success, Sync picks, All artists.
+- Fitted individually: Mix & Brief Queue value (clamp; two lines on phones), health-light names (clamp 12–14px so ten lights stay five-across; "Concentration" breaks at a soft hyphen).
+- Checked at 375/390/430 (844 and 650 tall), inside a real 650px frame (embed mode) and at 1440: no horizontal scroll, no clipped text, tiles and bottom bar unchanged.
+
 ## Open questions / blocked
 1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 

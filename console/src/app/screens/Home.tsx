@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { emph } from '../emph';
 import { useSnap, money, pct, signedPct, Ladder, Spark, Led, Section, Count, labelTime, day, SourceBadge, Empty, lightWord, Header } from '../ui';
 import { CCHeadline, CCBrief, CCFacts } from '../cc';
 import { mixBriefQueue, bookedAhead } from '../../shared/work';
@@ -54,7 +55,7 @@ export default function Home() {
         </button>
         <button className="meter" onClick={go('studio')} aria-label={`Mix and brief queue: ${mq.mixes} mixes, ${mq.briefs} briefs; ${mq.overdueMixes} mixes overdue${mq.overdueBriefs ? `, ${mq.overdueBriefs} briefs past due` : ''}. Open Studio.`}>
           <span className="label">Mix &amp; Brief Queue</span>
-          <span className="val sm" style={{ color: mq.anyOverdue ? 'var(--bad)' : undefined, whiteSpace: 'normal', lineHeight: 1.15 }}><span style={{ whiteSpace: 'nowrap' }}>{mq.mixes} mixes</span> <span style={{ whiteSpace: 'nowrap' }}>· {mq.briefs} briefs</span></span>
+          <span className="val sm fit" style={{ color: mq.anyOverdue ? 'var(--bad)' : undefined, whiteSpace: 'normal', lineHeight: 1.15 }}><span style={{ whiteSpace: 'nowrap' }}>{mq.mixes} mixes</span><span className="sep"> · </span><span style={{ whiteSpace: 'nowrap' }}>{mq.briefs} briefs</span></span>
           <span className="msub"><Led light={mq.anyOverdue ? 'red' : mq.mixes + mq.briefs >= 6 ? 'amber' : 'green'} word={false} /> {mq.overdueMixes} overdue mix{mq.overdueMixes === 1 ? '' : 'es'}{mq.overdueBriefs ? ` · ${mq.overdueBriefs} brief${mq.overdueBriefs === 1 ? '' : 's'} past due` : ''}{mq.approx ? ' (some counts approx.)' : ''}
             {mq.nextBrief && <><br />Next brief: {mq.nextBrief.brief} · {labelDay(mq.nextBrief.next!, { weekday: 'short', month: 'short', day: 'numeric' })}</>}
           </span>
@@ -84,8 +85,8 @@ export default function Home() {
                 <a href={m.url} target="_blank" rel="noopener noreferrer">
                   <span className={`led ${m.cat === 'overdue' ? 'red' : m.cat === 'money' ? 'amber' : 'none'}`} aria-hidden="true" style={{ marginTop: 2 }}>{m.cat === 'overdue' ? '■' : m.cat === 'money' ? '▲' : '●'}</span>
                   <span>
-                    <div className="what">{m.what}</div>
-                    <div className="why">{m.why}</div>
+                    <div className="what">{emph(m.what)}</div>
+                    <div className="why">{emph(m.why)}</div>
                     <div className="src">{m.source} ↗</div>
                   </span>
                 </a>
@@ -104,7 +105,7 @@ export default function Home() {
           {lights.map((l) => (
             <button key={l.area} className="led-btn" aria-expanded={open === l.area} onClick={() => setOpen(open === l.area ? null : l.area)} aria-label={`${l.area}: ${lightWord(l.light)}. ${l.today}`}>
               <Led light={l.light} word={false} />
-              <span className="led-name">{l.area}</span>
+              <span className="led-name">{l.area.split(' ').map((w) => (w.length > 10 ? `${w.slice(0, Math.ceil(w.length / 2) - 1)}\u00AD${w.slice(Math.ceil(w.length / 2) - 1)}` : w)).join(' ')}</span>
               <span className="led-word" style={{ color: 'var(--ink-3)' }}>{lightWord(l.light)}</span>
             </button>
           ))}

@@ -1,4 +1,5 @@
 /** SINCE LAST UPDATE — the most important verified business changes, newest visit first. */
+import { emph } from './emph';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSnap, Section, labelTime } from './ui';
 import { labelDay } from '../shared/time';
@@ -51,8 +52,8 @@ export function SinceLastUpdate() {
                   <a href={e.url} target="_blank" rel="noopener noreferrer">
                     <span className="since-dot" aria-hidden="true" style={{ color: COLOR[e.tone] }}>{ICON[e.tone]}</span>
                     <span>
-                      <span className="what">{e.title}{e.isNew && <span className="pill gold" style={{ marginLeft: 6 }}>New</span>}</span>
-                      <span className="why">{e.detail}</span>
+                      <span className="what">{emph(e.title)}{e.isNew && <span className="pill gold" style={{ marginLeft: 6 }}>New</span>}</span>
+                      <span className="why">{emph(e.detail)}</span>
                       <span className="src">{e.recordDate ? labelDay(e.recordDate, { month: 'short', day: 'numeric' }) : `Spotted ${labelTime(e.seenAt)}`} · {e.source} ↗</span>
                     </span>
                   </a>

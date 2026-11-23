@@ -1,4 +1,5 @@
 /** Sync screen additions (Kris, Nov 23): This week's 5, Sync trajectory, Sync playbook. View only. */
+import { emph } from './emph';
 import React, { useState } from 'react';
 import { useSnap, Section, Empty, money, useWidth } from './ui';
 import { syncMonthly, syncWeekly } from '../shared/synctraj';
@@ -34,7 +35,7 @@ export function SyncWeek5() {
                 </div>
                 <div className="cap">{x.company}{sent ? ` · ${x.type}` : ''}</div>
                 <button className="w5-email" onClick={() => copy(`e:${x.email}`, x.email)} aria-label={`Copy ${x.email}`}>{copied === `e:${x.email}` ? 'Copied ✓' : x.email} <span aria-hidden="true">⧉</span></button>
-                <div className="sub">{x.how}</div>
+                <div className="sub">{emph(x.how)}</div>
                 {x.row && <a className="link-sm" href={x.row} target="_blank" rel="noopener noreferrer">Tracker row ↗</a>}
                 {!sent && (() => {
                   const prompt = maestroPrompt(x, w?.week_label);
@@ -69,7 +70,7 @@ export function SyncPlaybook() {
         {items.map((x, i) => (
           <div className="panel" key={i}>
             <div className="mid" style={{ fontSize: 17 }}>{x.title}</div>
-            <p className="sub" style={{ margin: '6px 0' }}>{x.body}</p>
+            <p className="sub" style={{ margin: '6px 0' }}>{emph(x.body)}</p>
             <a className="link-sm" href={x.url} target="_blank" rel="noopener noreferrer">{x.source}{x.date ? ` · ${/^\d{4}-\d{2}-\d{2}$/.test(x.date) ? labelDay(x.date, { month: 'short', day: 'numeric', year: 'numeric' }) : x.date}` : ''} ↗</a>
           </div>
         ))}
@@ -112,7 +113,7 @@ export function SyncTrajectory() {
           <svg width={W} height={H} role="img" aria-label={mode === 'month' ? `Sync money and activity by month: ${month.map((m, i) => `${label(m.key)} ${money$[i] == null ? 'no data' : money(money$[i])}, ${m.briefs} briefs, ${m.outreach ?? 'no'} outreach`).join('; ')}` : `Briefs and outreach by week: ${week.map((w) => `${label(w.key)} ${w.briefs} briefs, ${w.outreach ?? 'no'} outreach`).join('; ')}`}>
             {mode === 'month' && month.map((m, i) => {
               const bw = Math.max(4, slot * 0.6), x = cx(i) - bw / 2;
-              if (m.fees == null && !m.bmi) return <text key={m.key} x={cx(i)} y={H - padB - 4} textAnchor="middle" fontSize="11" fill="var(--ink-3)">–</text>;
+              if (m.fees == null && !m.bmi) return <text key={m.key} x={cx(i)} y={H - padB - 4} textAnchor="middle" fontSize="14" fill="var(--ink-2)">–</text>;
               const fe = m.fees ?? 0;
               return (
                 <g key={m.key}>
@@ -127,7 +128,7 @@ export function SyncTrajectory() {
               <g key={`p${c.key}`}>
                 <circle cx={cx(i)} cy={yC(c.briefs)} r="3" fill="var(--ink)" />
                 {c.outreach != null && <circle cx={cx(i)} cy={yC(c.outreach)} r="3" fill="var(--lane-studio)" />}
-                {i % every === 0 && <text x={cx(i)} y={H - 8} textAnchor="middle" fontSize="12" fill="var(--ink-3)">{label(c.key)}</text>}
+                {i % every === 0 && <text x={cx(i)} y={H - 8} textAnchor="middle" fontSize="14" fill="var(--ink-2)">{label(c.key)}</text>}
               </g>
             ))}
             <line x1={padL} x2={W - padR} y1={H - padB} y2={H - padB} stroke="var(--hair-2)" />

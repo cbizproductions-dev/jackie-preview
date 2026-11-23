@@ -309,3 +309,130 @@ details.math .well { font: 13px/1.5 var(--font-num); color: var(--ink-2); margin
 .w5-prompt { margin-top: 8px; border-top: 1px dashed var(--hair-2); padding-top: 6px; }
 .w5-prompt summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--gold-hi); font-weight: 600; }
 .w5-prompt pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; padding: 10px; background: var(--well); border: 1px solid var(--hair); border-radius: 8px; font: 14px/1.45 var(--font-body, inherit); color: var(--ink); user-select: text; }
+
+/* ---------- Readability pass (Kris, Nov 23): about one step larger, brighter information text.
+   Typography and colour only, in rem so browser zoom and text-size settings still apply. ---------- */
+.shell { line-height: 1.45; }
+.shell:not(.embedded) { font-size: 1.0625rem; }
+.shell:not(.embedded) .cap,
+.shell:not(.embedded) .moves .src,
+.shell:not(.embedded) .since-list .src,
+.shell:not(.embedded) .meter .msub,
+.shell:not(.embedded) .hdr .asof,
+.shell:not(.embedded) .legend,
+.shell:not(.embedded) .cmonth .cap,
+.shell:not(.embedded) .foot,
+.shell:not(.embedded) details.math > summary,
+.shell.embedded .cap,
+.shell.embedded .moves .src,
+.shell.embedded .since-list .src,
+.shell.embedded .meter .msub,
+.shell.embedded .hdr .asof,
+.shell.embedded .legend,
+.shell.embedded .cmonth .cap,
+.shell.embedded .foot,
+.shell.embedded details.math > summary { font-size: 0.875rem; }
+.shell:not(.embedded) .sub,
+.shell:not(.embedded) .moves .why,
+.shell:not(.embedded) .since-list .why,
+.shell:not(.embedded) .banner,
+.shell:not(.embedded) .cc-say,
+.shell:not(.embedded) .link-sm,
+.shell:not(.embedded) .w5-email,
+.shell:not(.embedded) table.tbl,
+.shell:not(.embedded) .cc-l,
+.shell:not(.embedded) .w5-prompt pre { font-size: 0.9375rem; }
+.shell.embedded .sub,
+.shell.embedded .moves .why,
+.shell.embedded .since-list .why,
+.shell.embedded .banner,
+.shell.embedded .cc-say,
+.shell.embedded .link-sm,
+.shell.embedded .w5-email,
+.shell.embedded table.tbl,
+.shell.embedded .cc-l,
+.shell.embedded .w5-prompt pre { font-size: 0.9375rem; }
+.shell:not(.embedded) .moves .what,
+.shell:not(.embedded) .since-list .what,
+.shell:not(.embedded) .cc-list li,
+.shell:not(.embedded) .row .t strong,
+.shell:not(.embedded) .cc-headline p { font-size: 1.0625rem; }
+.shell:not(.embedded) .label,
+.shell:not(.embedded) .meter .label,
+.shell:not(.embedded) .strip,
+.shell.embedded .label,
+.shell.embedded .meter .label,
+.shell.embedded .strip { font-size: 0.875rem; }
+.shell:not(.embedded) .tbl th,
+.shell:not(.embedded) .led-name,
+.shell:not(.embedded) .led-word,
+.shell:not(.embedded) .cal-day .d,
+.shell.embedded .tbl th,
+.shell.embedded .led-name,
+.shell.embedded .led-word,
+.shell.embedded .cal-day .d { font-size: 0.875rem; }
+.shell:not(.embedded) .chart text { font-size: 0.875rem; }
+@media (min-width: 960px) {
+.shell:not(.embedded) { font-size: 1.125rem; }
+.shell:not(.embedded) .cap,
+.shell:not(.embedded) .moves .src,
+.shell:not(.embedded) .since-list .src,
+.shell:not(.embedded) .meter .msub,
+.shell:not(.embedded) .hdr .asof,
+.shell:not(.embedded) .legend,
+.shell:not(.embedded) .cmonth .cap,
+.shell:not(.embedded) .foot,
+.shell:not(.embedded) details.math > summary { font-size: 0.9375rem; }
+.shell:not(.embedded) .sub,
+.shell:not(.embedded) .moves .why,
+.shell:not(.embedded) .since-list .why,
+.shell:not(.embedded) .banner,
+.shell:not(.embedded) .cc-say,
+.shell:not(.embedded) .link-sm,
+.shell:not(.embedded) .w5-email,
+.shell:not(.embedded) table.tbl,
+.shell:not(.embedded) .cc-l,
+.shell:not(.embedded) .w5-prompt pre { font-size: 1rem; }
+.shell:not(.embedded) .moves .what,
+.shell:not(.embedded) .since-list .what,
+.shell:not(.embedded) .cc-list li,
+.shell:not(.embedded) .row .t strong,
+.shell:not(.embedded) .cc-headline p { font-size: 1.125rem; }
+.shell:not(.embedded) .label,
+.shell:not(.embedded) .meter .label,
+.shell:not(.embedded) .strip { font-size: 1rem; }
+.shell:not(.embedded) .tbl th,
+.shell:not(.embedded) .led-name,
+.shell:not(.embedded) .led-word,
+.shell:not(.embedded) .cal-day .d { font-size: 0.875rem; }
+.shell:not(.embedded) .chart text { font-size: 0.875rem; }
+}
+.sub, .moves .why, .since-list .why, .cc-say { line-height: 1.45; }
+.cap, .legend, .foot, .meter .msub, .cmonth .cap { color: var(--ink-2); }
+.moves .src, .since-list .src, .hdr .asof, .cap.src { color: var(--ink-3); }
+.row .t strong, .moves .what, .since-list .what { color: var(--ink); }
+
+/* Emphasis inside sentences: numbers in Plex Mono (tabular, a shade brighter, one weight heavier); status words semibold and tinted.
+   Every status keeps its word, so colour is never the only signal. */
+.n { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); font-size: 0.94em; letter-spacing: -0.01em; }
+.what .n, strong .n { font-weight: 700; }
+.st { font-weight: 600; }
+.st.bad { color: var(--bad); }
+.st.warn { color: var(--warn); }
+.st.ok { color: var(--ok); }
+.st.info { color: #8fb8f2; }
+/* Only this value is fitted, nothing else shrinks. */
+.meter .val.fit { font-size: clamp(1.15rem, 5.6vw, 1.5rem); }
+/* Readability pass, part 2: the last small text (chips, kickers, buttons, folds, scale labels) up to 14px. */
+.shell .pill, .shell .hdr .kicker, .shell .btn-notion, .shell .well, .shell details > summary, .shell select, .shell option { font-size: 0.875rem; }
+.shell .led, .shell .since-dot { font-size: 0.875rem; }
+.shell .n { font-size: max(0.94em, 0.875rem); }
+.shell .ticklabels, .shell .ticklabels span { font-size: 0.875rem; }
+/* Health-light names: the one element fitted with clamp() so ten lights still sit five-across on a phone. */
+.shell .leds .led-name { font-size: clamp(0.75rem, 3.15vw, 0.875rem); letter-spacing: 0; overflow-wrap: normal; word-break: normal; hyphens: none; }
+.shell .leds .led-word { font-size: clamp(0.75rem, 3.3vw, 0.875rem); }
+.leds .led-btn { min-width: 0; }
+.shell details.math .well { font-size: 0.875rem; }
+@media (max-width: 719px) { .meter .val.fit .sep { display: block; height: 0; overflow: hidden; } }
+/* A very long light name ("Concentration") hyphenates at a soft hyphen instead of shrinking or overflowing. */
+.shell .leds .led-name { hyphens: manual; }

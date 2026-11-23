@@ -21,7 +21,7 @@ export default function Cabinet() {
           {s.members.length ? s.members.map((m) => (
             <div className="row" key={m.name} style={{ gridTemplateColumns: '1fr auto' }}>
               <span className="t"><strong>{m.name}</strong><div className="sub">{m.role}</div><div className="cap">Role from: {m.roleSource}{m.owns.length ? ` · Owns: ${m.owns.join(', ')}` : ''}</div></span>
-              <span className="r"><div className="num" style={{ fontSize: 13 }}>{ago(m.lastActive, s.generatedAt)}</div><a className="link-sm" href={m.logUrl} target="_blank" rel="noopener noreferrer">{m.logName} ↗</a></span>
+              <span className="r"><div className="num" style={{ fontSize: '0.875rem' }}>{ago(m.lastActive, s.generatedAt)}</div><a className="link-sm" href={m.logUrl} target="_blank" rel="noopener noreferrer">{m.logName} ↗</a></span>
             </div>
           )) : <Empty>Cabinet logs haven’t been read yet.</Empty>}
           <p className="cap">Last activity = the log page’s last edited time. The Dashboard doesn’t summarize anyone’s log — tap through to read it.</p>
