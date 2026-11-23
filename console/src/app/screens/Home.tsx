@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSnap, money, pct, signedPct, Ladder, Spark, Led, Section, Count, labelTime, day, SourceBadge, Empty, lightWord, Header } from '../ui';
 import { CCHeadline, CCBrief, CCFacts } from '../cc';
+import { mixBriefQueue, bookedAhead } from '../../shared/work';
 import { SinceLastUpdate } from '../since';
 import { goalTargets, thisWeekMetric, yearMetrics, todaysMoves, healthLights, ROOMS, studioOps, monthMetrics, currentWeek } from '../../shared/derive';
 import { momentum, weekCash, weekStatus } from '../../shared/rules';
@@ -13,6 +14,8 @@ export default function Home() {
   const yr = yearMetrics(s);
   const ops = studioOps(s);
   const mo = momentum(s.weeks, s.today);
+  const mq = mixBriefQueue(s);
+  const ba = bookedAhead(s);
   const mm = monthMetrics(s);
   const moves = todaysMoves(s);
   const lights = healthLights(s);
@@ -30,16 +33,18 @@ export default function Home() {
       <Header kicker="C-BIZ OFFICIAL · Music business" title="Dashboard" sources="Weekly Scorecard, Income Ledger, Goals, Studio Board, Intelligence Feed" notion={ROOMS.home} />
       <div className="bridge" role="group" aria-label="Meter bridge">
         <button className="meter wide" onClick={go('money')} aria-label={`This week: ${money(wk.value)} of $${t.goal} goal${inProg ? ', in progress' : ''}. Open Money.`}>
-          <span className="label">This week · {wk.period}</span>
+          <span className="label">This week · {wk.period}{s.updating.includes('scorecard') ? ' · updating' : ''}</span>
           <span className="val"><Count value={wk.value} fmt={(n) => money(n)} /></span>
           <Ladder value={wk.value} max={t.stretch * 1.1} label={`This week: ${money(wk.value)} of $${t.goal} goal${inProg ? ', in progress' : ''}`} ticks={[{ at: t.goal, label: `$${t.goal}` }, { at: t.stretch, label: `$${t.stretch.toLocaleString('en-US')}`, dashed: true }]} />
-          <span className="msub">{prog == null ? 'Not on file' : `${pct(prog)} of $${t.goal}`}{inProg ? ' · week in progress' : ' · week complete'}</span>
+          <span className="msub">{!wk.value && wk.status === 'in_progress' && (wk.note === 'week just started' || s.today === weekStart(s.today)) ? '$0 so far · week just started' : <>{prog == null ? 'Not on file' : `${pct(prog)} of $${t.goal}`}{wk.status === 'ok' ? ' · week complete' : ' · week in progress'}</>}</span>
         </button>
-        <button className="meter" onClick={go('money')} aria-label={`2026 so far ${money(yr.ytd.value)}. Open Money.`}>
-          <span className="label">{yr.year} so far</span>
-          <span className="val sm"><Count value={yr.ytd.value == null ? null : Math.round(yr.ytd.value)} fmt={(n) => money(n)} /></span>
+        <button className="meter" onClick={go('calendar')} aria-label={`Booked ahead: ${ba.count} paid session${ba.count === 1 ? '' : 's'} in the next 14 days, ${money(ba.expected)} expected, not income. Open Calendar.`}>
+          <span className="label">Booked ahead · 14 days</span>
+          <span className="val sm">{ba.count} session{ba.count === 1 ? '' : 's'}</span>
+          <Ladder value={ba.week.expected} max={t.goal} segments={16} label={`Next 7 days: ${money(ba.week.expected)} expected of the $${t.goal} goal`} ticks={[{ at: t.goal, label: `$${t.goal}` }]} />
           <span className="msub">
-            {yr.best && yr.ytd.value != null ? (yr.ytd.value > yr.best.total ? `Best year on record · prior best ${money(Math.round(yr.best.total))} (${yr.best.year})` : `Best prior year ${money(Math.round(yr.best.total))} (${yr.best.year})`) : 'Verified music income'}
+            {ba.count ? <>{ba.hoursKnown ? `${ba.hours} hrs` : `${ba.hours}+ hrs`} · {money(ba.expected)} expected, not income{ba.rateMissing ? ` · ${ba.rateMissing} rate not set` : ''}<br />Next 7 days: {money(ba.week.expected)} of ${t.goal}</> : 'Nothing booked in the next 14 days'}
+            {ba.next && <><br />Next: {ba.next.who}, {labelDay(ba.next.date, { weekday: 'short', month: 'short', day: 'numeric' })}{ba.next.time ? ` · ${ba.next.time}` : ''}{ba.next.rate == null ? ' · rate not set' : ''}</>}
           </span>
         </button>
         <button className="meter" onClick={go('studio')} aria-label={`Vibe to paid ${pct(ops.vibe.rate)}, ${ops.vibe.paid} of ${ops.vibe.showed}. Open Studio.`}>
@@ -47,10 +52,12 @@ export default function Home() {
           <span className="val sm">{ops.vibe.rate == null ? <span className="missing">Not on file</span> : pct(ops.vibe.rate)}</span>
           <span className="msub">{ops.vibe.paid} of {ops.vibe.showed} who showed{ops.vibe.booked ? ` · +${ops.vibe.booked} booked, not paid yet` : ''}</span>
         </button>
-        <button className="meter" onClick={go('studio')} aria-label={`Mix queue ${ops.queue.open} open, ${ops.queue.overdue} overdue. Open Studio.`}>
-          <span className="label">Mix queue</span>
-          <span className="val sm" style={{ color: ops.queue.overdue ? 'var(--bad)' : undefined }}>{ops.queue.open} open</span>
-          <span className="msub"><Led light={ops.queue.overdue ? 'red' : ops.queue.open >= 6 ? 'amber' : 'green'} word={false} /> {ops.queue.overdue} overdue · {ops.queue.dueWithinWeek} due in the next 7 days{ops.queue.approx ? ' · some counts approx.' : ''}</span>
+        <button className="meter" onClick={go('studio')} aria-label={`Mix and brief queue: ${mq.mixes} mixes, ${mq.briefs} briefs; ${mq.overdueMixes} mixes overdue${mq.overdueBriefs ? `, ${mq.overdueBriefs} briefs past due` : ''}. Open Studio.`}>
+          <span className="label">Mix &amp; Brief Queue</span>
+          <span className="val sm" style={{ color: mq.anyOverdue ? 'var(--bad)' : undefined, whiteSpace: 'normal', lineHeight: 1.15 }}><span style={{ whiteSpace: 'nowrap' }}>{mq.mixes} mixes</span> <span style={{ whiteSpace: 'nowrap' }}>· {mq.briefs} briefs</span></span>
+          <span className="msub"><Led light={mq.anyOverdue ? 'red' : mq.mixes + mq.briefs >= 6 ? 'amber' : 'green'} word={false} /> {mq.overdueMixes} overdue mix{mq.overdueMixes === 1 ? '' : 'es'}{mq.overdueBriefs ? ` · ${mq.overdueBriefs} brief${mq.overdueBriefs === 1 ? '' : 's'} past due` : ''}{mq.approx ? ' (some counts approx.)' : ''}
+            {mq.nextBrief && <><br />Next brief: {mq.nextBrief.brief} · {labelDay(mq.nextBrief.next!, { weekday: 'short', month: 'short', day: 'numeric' })}</>}
+          </span>
         </button>
         <button className="meter" onClick={go('money')} aria-label={'windowWeeks' in mo && mo.windowWeeks ? `Momentum ${signedPct((mo as any).change)}, ${(mo as any).label}` : 'Momentum: not enough complete weeks'}>
           <span className="label">Momentum</span>
@@ -88,9 +95,9 @@ export default function Home() {
         ) : <Empty>Nothing overdue, owed or due in the next 7 days.</Empty>}
       </Section>
 
-      <SinceLastUpdate />
-
       <CCBrief />
+
+      <SinceLastUpdate />
 
       <Section title="Ten health lights" right={<a className="link-sm" href="#/strategy">Rules ›</a>}>
         <div className="leds">

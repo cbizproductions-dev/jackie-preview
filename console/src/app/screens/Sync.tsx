@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSnap, Header, Section, money, moneyAuto, pct, signedPct, Empty, HBars, NotionLink, shortDay, useTip, useWidth } from '../ui';
 import { CCRoom } from '../cc';
+import { SyncWeek5, SyncTrajectory, SyncPlaybook } from '../sync-extra';
 import { ROOMS, bmiSummary, catalogNumbers } from '../../shared/derive';
 import { quarterKey, syncReplyRate, briefConversion, round2 } from '../../shared/rules';
 
@@ -46,6 +47,7 @@ export default function Sync() {
   return (
     <>
       <Header kicker="Brief Board · Royalty Dashboard · Sync Tracker" title="Sync & Royalties" sources="Brief Board (Maestro), BMI Statements, Intelligence Feed, Command Center data.json" notion={ROOMS.sync} art="la" />
+      <SyncWeek5 />
       <CCRoom room="sync" />
 
       {working && working.rows?.length > 0 && (
@@ -57,6 +59,8 @@ export default function Sync() {
           </div>
         </Section>
       )}
+
+      <SyncTrajectory />
 
       <Section title="Active briefs" right={<NotionLink href={ROOMS.briefBoard} />}>
         <div className="panel">
@@ -145,6 +149,7 @@ export default function Sync() {
         </Section>
       </div>
       <p className="foot">Dataset counts (statements, briefs, contacts on file) use stricter definitions than Kris’s career figures (2,000+ placements, 210+ shows), so they’re smaller. See Career for the side-by-side.</p>
+      <SyncPlaybook />
     </>
   );
 }

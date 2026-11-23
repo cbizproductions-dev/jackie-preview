@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSnap, Header, Section, WeeklyBars, StackBar, money, moneyAuto, pct, Fold, Math_, Ladder, Empty, NotionLink, signedPct } from '../ui';
+import { useSnap, Header, Section, WeeklyBars, StackBar, money, moneyAuto, pct, Fold, Math_, Ladder, Empty, NotionLink, signedPct, Count } from '../ui';
 import { CCRoom, CCMoneyOnTable, CCPace, CCFootnote } from '../cc';
 import { ROOMS, goalTargets, laneTotals, monthMetrics, yearMetrics, studioOps } from '../../shared/derive';
 import { pace, weekCash, weekStatus, beatTransactions, round2, STUDIO_WEEKS_START } from '../../shared/rules';
@@ -56,6 +56,17 @@ export default function Money() {
   return (
     <>
       <Header kicker="Cash Flow Radar · Revenue & Trajectory" title="Money" sources="Weekly Scorecard, Income Ledger, Goals & Milestones, Command Center data.json" notion={ROOMS.revenue} art="la" />
+
+      {/* 2026 So Far (moved from Home, Nov 23): same number and comparison. */}
+      <div className="bridge" role="group" aria-label="Year to date">
+        <div className="meter wide" aria-label={`${yr.year} so far ${money(yr.ytd.value)}`}>
+          <span className="label">{yr.year} so far{s.updating.includes('ledger') ? ' · updating' : ''}</span>
+          <span className="val"><Count value={yr.ytd.value == null ? null : Math.round(yr.ytd.value)} fmt={(n) => money(n)} /></span>
+          <span className="msub">
+            {yr.best && yr.ytd.value != null ? (yr.ytd.value > yr.best.total ? `Best year on record · prior best ${money(Math.round(yr.best.total))} (${yr.best.year})` : `Best prior year ${money(Math.round(yr.best.total))} (${yr.best.year})`) : 'Verified music income'}
+          </span>
+        </div>
+      </div>
 
       <CCRoom room="revenue" />
 

@@ -65,7 +65,9 @@ export function thisWeekMetric(s: Snapshot): Metric {
   const w = currentWeek(s);
   const ws = weekStart(s.today);
   const period = `${labelDay(ws, { month: 'short', day: 'numeric' })}–${labelDay(addDays(ws, 6), { month: 'short', day: 'numeric' })}`;
-  if (!w) return m(null, '$', period, 'Weekly Scorecard', s.generatedAt, 'missing', 'No row for this week yet — the daily refresh creates it on Mondays');
+  // Monday before the refresh creates this week's row: nothing has come in yet, so $0 so far (Kris, Nov 23). Never "complete" before Sunday ends.
+  if (!w && s.weeks.length) return m(0, '$', period, 'Weekly Scorecard', s.generatedAt, 'in_progress', 'week just started');
+  if (!w) return m(null, '$', period, 'Weekly Scorecard', s.generatedAt, 'missing', 'Weekly Scorecard not on file');
   return m(weekCash(w), '$', period, 'Weekly Scorecard (from Studio Board)', s.generatedAt, weekStatus(w.start, s.today) === 'complete' ? 'ok' : 'in_progress', w.notes);
 }
 

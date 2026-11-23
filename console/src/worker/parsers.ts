@@ -243,3 +243,39 @@ export function tunesatRows(md: string) {
   return rows.slice(1, 13).map((r) => ({ title: r[0] ?? '', show: r[1] ?? '', detail: r.slice(2).join(' · ') }));
 }
 export { addDays };
+
+/** "## Artist profiles" on the Studio Board: "Name — note". The merge note at the end is not an artist. Groups follow the Command Center's "All artists" toggle. */
+export type ArtistGroup = 'paid' | 'remote' | 'beat' | 'sync' | 'pipeline' | 'closed' | 'other';
+export function artistProfiles(mdRaw: string): { name: string; note: string; group: ArtistGroup }[] {
+  const md = unescape(mdRaw);
+  const out: { name: string; note: string; group: ArtistGroup }[] = [];
+  for (const l of bullets(section(md, /artist profiles/i))) {
+    const i = l.indexOf(' — ');
+    if (i < 0) continue;
+    const name = l.slice(0, i).replace(/\*\*/g, '').trim();
+    const note = l.slice(i + 3).trim();
+    // Merge notes ("X is the same artist formerly listed…") are not artists.
+    if (/\bis the same artist\b|\bformerly listed\b/i.test(name) || name.split(' ').length > 6) continue;
+    const t = note.toLowerCase();
+    let group: ArtistGroup = 'other';
+    if (/^paid client/.test(t)) group = 'paid';
+    else if (/remote mix/.test(t)) group = 'remote';
+    else if (/beat buyer/.test(t)) group = 'beat';
+    else if (/sync (vocalist|collaborator|session)/.test(t)) group = 'sync';
+    else if (/closed|no-show|passed/.test(t)) group = 'closed';
+    else if (/vibe artist|booked|pipeline/.test(t)) group = 'pipeline';
+    out.push({ name, note, group });
+  }
+  return out;
+}
+
+/** Loose date from free text ("Nov 20", "2026-11-20", "Fri Nov 20, 2026"); null when none. */
+export function textDate(s: string | null | undefined, today: string): string | null {
+  if (!s) return null;
+  const iso = /(\d{4}-\d{2}-\d{2})/.exec(s);
+  if (iso) return iso[1];
+  const d = parseLooseDate(s, Number(today.slice(0, 4)));
+  if (!d) return null;
+  // A month/day with no year that lands in the future belongs to last year.
+  return d > addDays(today, 31) && !/\b20\d\d\b/.test(s) ? `${Number(d.slice(0, 4)) - 1}${d.slice(4)}` : d;
+}

@@ -5,8 +5,11 @@ import { ROOMS, studioOps, rebookCandidates, goalTargets } from '../../shared/de
 import { isOverdue, weekCash } from '../../shared/rules';
 import { addDays, daysBetween } from '../../shared/time';
 
+const ARTIST_GROUPS: [string, string][] = [['paid', 'Paid studio clients'], ['remote', 'Remote mix clients'], ['beat', 'Beat buyers'], ['sync', 'Sync collaborators'], ['pipeline', 'Booked or in the pipeline'], ['closed', 'Closed or passed'], ['other', 'Other']];
+
 export default function Studio() {
   const s = useSnap();
+  const artists = s.studio.artists ?? [];
   const ops = studioOps(s);
   const t = goalTargets(s);
   const rebook = new Set(rebookCandidates(s).map((c) => c.name));
@@ -67,6 +70,21 @@ export default function Studio() {
             );
           })}
           <p className="cap">Gold rows: rebook candidates — one paid session, 14+ days ago. “Not on file” means the amount wasn’t recorded, not $0.</p>
+        </div>
+      </Section>
+
+      <Section title={`All artists · ${artists.length}`} right={<span className="cap">From the Studio Board’s artist profiles</span>}>
+        <div className="panel">
+          {artists.length ? ARTIST_GROUPS.map(([g, label]) => {
+            const xs = artists.filter((a) => a.group === g);
+            if (!xs.length) return null;
+            return (
+              <Fold key={g} title={`${label} (${xs.length})`}>
+                {xs.map((a) => <div className="row" key={a.name} style={{ gridTemplateColumns: '1fr' }}><span className="t"><strong>{a.name}</strong><div className="cap">{a.note}</div></span></div>)}
+              </Fold>
+            );
+          }) : <Empty>No artist profiles on the Studio Board right now.</Empty>}
+          <p className="cap">Every artist Kris has connected with, not just paying clients, grouped like the Command Center’s “All artists” list. Read from the Studio Board — Muse mirror.</p>
         </div>
       </Section>
 

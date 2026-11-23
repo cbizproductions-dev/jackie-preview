@@ -64,7 +64,8 @@ const ROOM = {
 
 /** What the dashboard knows right now, per category, only for sources that were read successfully. */
 export function factsOf(s: Snapshot): Facts {
-  const ok = (id: string) => { const x = s.sources.find((y) => y.id === id); return !!x && (x.state === 'fresh' || x.state === 'stale'); };
+  // A source shown from its last good copy while it updates is never compared (no false changes mid-refresh).
+  const ok = (id: string) => { const x = s.sources.find((y) => y.id === id); return !!x && (x.state === 'fresh' || x.state === 'stale') && !(s.updating ?? []).includes(id); };
   const f: Facts = {};
   if (ok('briefs') && s.briefs.length) f.briefs = Object.fromEntries(s.briefs.filter((b) => b.url).map((b) => [b.url, { s: b.status ?? '', t: b.brief, c: b.company ?? '', d: b.due ?? null }]));
   if (ok('studio')) {

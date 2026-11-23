@@ -70,6 +70,18 @@ export class NotionReader {
     } while (cursor);
     return rows;
   }
+  /** Rows of a data source matching a Notion filter (read-only POST query). */
+  async queryDataSource(ds: string, filter: unknown, maxPages = 3): Promise<any[]> {
+    const rows: any[] = [];
+    let cursor: string | undefined;
+    let n = 0;
+    do {
+      const r = await this.req('POST', `/data_sources/${ds}/query`, { page_size: 100, filter, ...(cursor ? { start_cursor: cursor } : {}) });
+      rows.push(...r.results);
+      cursor = r.has_more ? r.next_cursor : undefined;
+    } while (cursor && ++n < maxPages);
+    return rows;
+  }
   async rows(databaseId: string): Promise<{ rows: any[]; lastEdited: string | null }> {
     const db = await this.database(databaseId);
     const ds = db.data_sources?.[0]?.id;

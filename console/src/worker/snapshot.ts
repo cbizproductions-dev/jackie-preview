@@ -25,6 +25,11 @@ export type SrcState = {
   dataSourceId?: string | null;
   error?: string | null;
   needsRead?: boolean;
+  /** The last read looked empty or partial (e.g. mid-refresh); the previous data is kept and shown as "updating". */
+  updating?: boolean;
+  suspectSince?: string | null;
+  /** Parser version the data was read with; an older one forces one re-read. */
+  v?: number;
   /** Data is the build-time capture, not a live read yet. */
   fromSeed?: boolean;
 };
@@ -38,6 +43,27 @@ export const RETRY_FAILED_MS = 2 * 60 * 1000;
 export const FULL_CHECK_MS = 6 * 3600 * 1000;
 /** Search results can lag a little; each sweep looks back this much further. */
 export const SWEEP_OVERLAP_MS = 10 * 60 * 1000;
+export const SUSPECT_MAX_MS = 30 * 60 * 1000;
+/** Bump when a parser starts reading new fields (Nov 23: artist profiles), so every source is re-read once. */
+export const DATA_VERSION = 2;
+
+/** Rough size of a source's data: rows in each list, one level deep. */
+function sizeOf(v: unknown): number {
+  if (Array.isArray(v)) return v.length;
+  if (v && typeof v === 'object') return Object.values(v).reduce<number>((a, x) => a + (Array.isArray(x) ? x.length : x == null ? 0 : 1), 0);
+  return v == null || v === '' ? 0 : 1;
+}
+/** True when a new read is empty, or less than half the size, where the last good read had real data. */
+export function looksIncomplete(prev: Record<string, unknown> | null | undefined, next: Record<string, unknown>): boolean {
+  if (!prev) return false;
+  for (const [k, pv] of Object.entries(prev)) {
+    if (k.startsWith('_')) continue;
+    const a = sizeOf(pv), b = sizeOf(next[k]);
+    if (a > 0 && b === 0) return true;
+    if (a >= 4 && b < a * 0.5) return true;
+  }
+  return false;
+}
 
 /**
  * One refresh pass. Probes sources whose last check is older than 15 minutes, re-reads only those whose
@@ -82,14 +108,14 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
   const order = [...SOURCES].sort((a, b) => (state.sources[a.id]?.checkedAt ?? '').localeCompare(state.sources[b.id]?.checkedAt ?? ''));
   for (const def of order) {
     const s: SrcState = state.sources[def.id] ? { ...state.sources[def.id] } : { lastEdited: null, checkedAt: null, readAt: null, data: null };
-    if (!s.data || s.fromSeed) s.needsRead = true;
+    if (!s.data || s.fromSeed || (s.v ?? 1) !== DATA_VERSION) s.needsRead = true;
     if (reader.calls >= opts.budget - 2) { if (mode === 'full' || s.needsRead) pending.push(def.id); state.sources[def.id] = s; continue; }
     if (def.discover) {
-      const recent = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < FULL_CHECK_MS && s.data && !s.fromSeed && !s.needsRead;
+      const recent = s.checkedAt && opts.now.getTime() - Date.parse(s.checkedAt) < FULL_CHECK_MS && s.data && !s.fromSeed && !s.needsRead && (s.v ?? 1) === DATA_VERSION;
       if (!recent && reader.calls < opts.budget * 0.7) {
         try {
           const r = await def.read(reader, today);
-          s.data = r.data; s.lastEdited = r.lastEdited; s.readAt = nowIso; s.checkedAt = nowIso; s.error = null; s.needsRead = false; s.fromSeed = false;
+          s.data = r.data; s.lastEdited = r.lastEdited; s.readAt = nowIso; s.checkedAt = nowIso; s.error = null; s.needsRead = false; s.fromSeed = false; s.v = DATA_VERSION;
           const found = Object.values(r.data)[0] as any;
           if (found?.dsId) s.dataSourceId = found.dsId;
         } catch (e) { s.error = String((e as Error).message ?? e).slice(0, 200); s.checkedAt = null; }
@@ -112,7 +138,22 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
       if (s.needsRead) {
         if (reader.calls >= opts.budget * 0.7) { pending.push(def.id); state.sources[def.id] = s; continue; }
         const r = await def.read(reader, today);
+        // A source that suddenly reads empty or much smaller is usually mid-refresh (e.g. the 6:47 refresh rewriting rows).
+        // Keep the last good copy, mark it "updating" and read again next time. After 30 minutes, accept the new data.
+        const suspect = !s.fromSeed && looksIncomplete(s.data, r.data);
+        if (suspect && (!s.suspectSince || opts.now.getTime() - Date.parse(s.suspectSince) < SUSPECT_MAX_MS)) {
+          s.suspectSince = s.suspectSince ?? nowIso;
+          s.updating = true;
+          s.needsRead = true;
+          s.checkedAt = null;
+          s.error = null;
+          state.sources[def.id] = s;
+          continue;
+        }
         s.data = r.data;
+        s.v = DATA_VERSION;
+        s.updating = false;
+        s.suspectSince = null;
         s.lastEdited = r.lastEdited ?? s.lastEdited;
         s.readAt = nowIso;
         s.needsRead = false;
@@ -142,11 +183,12 @@ export async function refreshPass(reader: NotionReader, prev: State, opts: { bud
 
 const EMPTY: Omit<Snapshot, 'generatedAt' | 'today' | 'mode' | 'state' | 'failed' | 'sources' | 'issues'> = {
   schemaVersion: 1, weeks: [], ledger: [], bmi: [], goals: [], insights: [], maintenance: [], photos: [],
-  studio: { synced: null, mixes: [], clients: [], vibe: [], deposits: [], upcoming: [], syncChecks: [], beatSales: [], deliveries: [] },
+  studio: { synced: null, mixes: [], clients: [], vibe: [], deposits: [], upcoming: [], syncChecks: [], beatSales: [], deliveries: [], artists: [] },
   calendar: { refreshed: null, lastVerified: null, days: [] }, briefs: [], contracts: [], leases: { rows: null },
   cashMoves: [], experimentTodos: [], members: [], tunesat: { rows: [], note: '' },
   system: { dictionary: [], rules: [], limitations: [] },
   career: { figures: [], timeline: [], verifiedCredits: [], reportedCredits: [], inMotion: [] }, futures: [], cc: {}, art: {}, brand: { found: false, url: '', rows: [] }, leads: { found: false, url: '', rows: [] },
+  syncContacts: [], scoutLeads: { found: false, url: '', rows: [] }, updating: [],
 };
 
 export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): Snapshot {
@@ -198,6 +240,8 @@ export function assemble(st: State, now: Date, mode: 'live' | 'seed' = 'live'): 
     sources.push({ id: 'apple', name: 'Apple Calendar (live feed)', owner: 'Kris', kind: 'page', url: 'https://www.icloud.com/calendar/', lastEdited: st.apple.readAt, readAt: st.apple.readAt, state: ok ? 'fresh' : 'failed', note: ok ? `Read live on open · ${st.apple.items.length} events in the next 60 days · ${added} not on the Notion calendar yet${st.apple.stats ? ` · shared calendar holds ${st.apple.stats.events} events, next one from today on: ${st.apple.stats.nextStart ?? 'none'}` : ''}` : `${st.apple.error}${st.apple.items.length ? ' — showing the last good copy' : ''}` });
   }
 
+  merged.updating = SOURCES.filter((d) => st.sources[d.id]?.updating).map((d) => d.id);
+  for (const src of sources) if (merged.updating.includes(src.id)) src.note = `Updating — showing the last good copy${st.sources[src.id]?.readAt ? ` from ${String(st.sources[src.id]?.readAt).slice(11, 16)} UTC` : ''}${src.note ? ` · ${src.note}` : ''}`;
   merged.members = st.members ?? [];
   const snap = {
     ...merged, schemaVersion: 1, generatedAt: nowIso, today, mode, state: failed.length ? 'partial' : 'ok', failed, sources, issues: [] as DataIssue[],

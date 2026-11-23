@@ -102,7 +102,7 @@ export const SOURCES: SourceDef[] = [
   db('leases', 'Beat Leases & Registrations', 'Maestro', '058a6cd1bf004ec88c9b3204f9050837', (rows) => ({ leases: { rows: rows.length } })),
   page('studio', 'Studio Board — Muse mirror', 'Muse', '4118b67fa84e815d87f9da794bb520d8', 2, (md, today) => {
     const sb = P.parseStudioBoard(md, today);
-    return { studio: { synced: sb.synced, mixes: sb.mixes, clients: sb.clients, vibe: sb.vibe, deposits: sb.deposits, upcoming: sb.upcoming, syncChecks: sb.syncChecks, beatSales: sb.beatSales, deliveries: sb.deliveries }, _weekLine: sb.weekLine, _openLine: sb.openLine };
+    return { studio: { synced: sb.synced, mixes: sb.mixes, clients: sb.clients, vibe: sb.vibe, deposits: sb.deposits, upcoming: sb.upcoming, syncChecks: sb.syncChecks, beatSales: sb.beatSales, deliveries: sb.deliveries, artists: P.artistProfiles(md) }, _weekLine: sb.weekLine, _openLine: sb.openLine };
   }),
   page('calendar', 'Rolling 60-Day Calendar', 'Muse', '4178b67fa84e81d5a551c62aa4d62c46', 1, (md) => ({ calendar: P.parseCalendar(md) })),
   page('cash', 'Cash Flow Radar', 'Claude', '41e8b67fa84e818283ffdb9b4b8af4e4', 1, (md) => ({ cashMoves: P.todos(md, /money moves/i) })),
@@ -165,6 +165,27 @@ export const SOURCES: SourceDef[] = [
     },
   },
   page('synctracker', 'Sync Tracker', 'Maestro + Claude', '40a8b67fa84e817789e6e7e10e23edd1', 0, () => ({})),
+  // Shared Sync Contacts: outreach dates and follow-ups. "Last contacted" and "Follow-up" are text fields, read as loose dates.
+  {
+    id: 'synccontacts', name: 'Shared Sync Contacts', owner: 'Maestro + Claude', kind: 'database', notionId: '29cb23c066344ea5ba4c451c6e8f41f6',
+    read: async (r, today) => {
+      const { rows, lastEdited } = await r.rows('29cb23c066344ea5ba4c451c6e8f41f6');
+      return {
+        data: {
+          syncContacts: rows.map((x) => {
+            const p = P_(x);
+            const lc = prop.text(p['Last contacted']);
+            const fu = prop.text(p['Follow-up']);
+            return {
+              name: prop.text(p['Name']), company: prop.text(p['Company']), type: prop.select(p['Type']) ?? '', list: prop.select(p['List']) ?? '',
+              status: prop.select(p['Status']) ?? '', lastContacted: P.textDate(lc, today), lastContactedText: lc, followUp: P.textDate(fu, today), followUpText: fu, url: url(x.id),
+            };
+          }),
+        },
+        lastEdited,
+      };
+    },
+  },
   page('scout', 'Scout Trackers', 'Muse / Maestro', '4088b67fa84e81b4af51c5e44d03c171', 0, () => ({})),
 ];
 
@@ -202,6 +223,34 @@ SOURCES.push(
     status: textOf(pick(p, 'Status')), link: textOf(pick(p, 'Link', 'URL')), url: url(x.id),
   })),
 );
+
+/** Scout trackers: only leads whose Status is Replied (waiting on Kris's answer). Found by title; filtered query keeps it to a few calls. */
+const SCOUT_TITLES = ['Beat Buyer Leads', 'Mix/Master Leads', 'Major Artist Leads'];
+SOURCES.push({
+  id: 'scoutleads', name: 'Scout lead trackers (replies)', owner: 'Muse / Maestro', kind: 'database', notionId: '', discover: true,
+  read: async (r) => {
+    const rows: any[] = [];
+    let found = 0;
+    let lastEdited: string | null = null;
+    for (const title of SCOUT_TITLES) {
+      const ds = await r.findDataSource(title);
+      if (!ds) continue;
+      found++;
+      if (ds.lastEdited && (!lastEdited || ds.lastEdited > lastEdited)) lastEdited = ds.lastEdited;
+      let hits: any[];
+      try { hits = await r.queryDataSource(ds.id, { property: 'Status', select: { equals: 'Replied' } }); }
+      catch { hits = await r.queryDataSource(ds.id, { property: 'Status', status: { equals: 'Replied' } }); }
+      for (const x of hits) {
+        const p = P_(x);
+        rows.push({
+          tracker: title, name: textOf(pick(p, 'Name')), reply: textOf(pick(p, 'Reply')), nextAction: textOf(pick(p, 'Next action')),
+          contacted: prop.date(pick(p, 'Date contacted')), followUp: prop.date(pick(p, 'Follow-up date')), edited: x.last_edited_time ?? null, url: url(x.id),
+        });
+      }
+    }
+    return { data: { scoutLeads: { found: found > 0, url: 'https://app.notion.com/p/4088b67fa84e81b4af51c5e44d03c171', rows } } as any, lastEdited };
+  },
+});
 
 export const CABINET = [
   { name: 'Claude', logName: 'Claude Daily Updates', log: '4008b67fa84e8131be8fc031b01df058', section: '3fe8b67fa84e8108a731db641473c228', match: /claude/i },

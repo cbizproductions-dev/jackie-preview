@@ -233,6 +233,7 @@ export const Snapshot = z.object({
     syncChecks: z.array(z.object({ date: z.string().nullable(), company: z.string(), amount: z.number() })),
     beatSales: z.array(z.object({ buyer: z.string(), date: z.string().nullable(), amount: z.number(), items: z.number() })),
     deliveries: z.array(z.object({ client: z.string(), date: z.string().nullable(), hours: z.number().nullable(), due: z.string().nullable() })).default([]),
+    artists: z.array(z.object({ name: z.string(), note: z.string(), group: z.enum(['paid', 'remote', 'beat', 'sync', 'pipeline', 'closed', 'other']) })).default([]),
   }),
   calendar: z.object({ refreshed: z.string().nullable(), lastVerified: z.string().nullable(), days: z.array(CalDay) }),
   briefs: z.array(Brief),
@@ -248,6 +249,10 @@ export const Snapshot = z.object({
   /** Brandon's "Brand Presence" database, if it exists in HQ (found by title). */
   brand: z.object({ found: z.boolean(), url: z.string(), rows: z.array(z.object({ item: z.string(), status: z.string(), key: z.string(), link: z.string(), lastChecked: z.string().nullable(), url: z.string() })) }).default({ found: false, url: '', rows: [] }),
   /** Beacon's "Speaking & Funding Leads" database, if it exists in HQ (found by title). */
+  syncContacts: z.array(z.object({ name: z.string(), company: z.string(), type: z.string(), list: z.string(), status: z.string(), lastContacted: z.string().nullable(), lastContactedText: z.string(), followUp: z.string().nullable(), followUpText: z.string(), url: z.string() })).default([]),
+  scoutLeads: z.object({ found: z.boolean(), url: z.string(), rows: z.array(z.object({ tracker: z.string(), name: z.string(), reply: z.string(), nextAction: z.string(), contacted: z.string().nullable(), followUp: z.string().nullable(), edited: z.string().nullable(), url: z.string() })) }).default({ found: false, url: '', rows: [] }),
+  /** Sources whose last read looked empty or partial (mid-refresh); their last good copy is shown. */
+  updating: z.array(z.string()).default([]),
   leads: z.object({ found: z.boolean(), url: z.string(), rows: z.array(z.object({ lead: z.string(), type: z.string(), date: z.string().nullable(), location: z.string(), status: z.string(), link: z.string(), url: z.string() })) }).default({ found: false, url: '', rows: [] }),
   /** Screen-print header art (traced from Kris's own photos), read from the runbook page. */
   art: z.record(z.object({ w: z.number(), h: z.number(), paths: z.string() })).default({}),
