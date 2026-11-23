@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* Layout: night-sky meridian — dark indigo ground, honey-gold light, three-treasure orbs as the recurring motif; asymmetric editorial grid */
 :root{
@@ -277,6 +278,8 @@ footer .refs{font:400 .74rem/1.6 var(--mono);color:var(--faint)}
 footer .refs a{color:var(--muted)}
 footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
 
+.cards{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.cards i{font-size:2.1rem;line-height:1;color:var(--gold-hi)}
 .reveal{transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .9s}
 .reveal.pre{transform:translateY(26px);opacity:.001}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal.pre{transform:none;opacity:1}}
@@ -314,10 +317,10 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
         <a class="btn btn-gold" href="#book">Book your session →</a>
         <a class="btn btn-ghost" href="#menu">See services &amp; pricing</a>
       </div>
+      <div class="cards" style="margin-top:28px" role="img" aria-label="We accept Visa, Mastercard, American Express and Discover"><i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-amex"></i><i class="fa-brands fa-cc-discover"></i></div>
       <div class="creds">
         <div><i>✦</i>(516) 206-7722 · Northport, NY</div>
-        <div><i>✦</i>Master &amp; Doctor of Acupuncture</div>
-        <div><i>✦</i>Now accepting cash &amp; credit cards</div>
+        <div><i>✦</i>Master of Acupuncture</div>
         <div><i>✦</i>LMT · Licensed Massage Therapist</div>
         <div><i>✦</i>Mobile · I come to you</div>
       </div>
@@ -538,7 +541,7 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
     <div>
       <div class="eyebrow">Meet your practitioner</div>
       <h2 style="margin-top:18px">Hi, I'm Jackie.</h2>
-      <p class="lede" style="margin-top:20px">I'm a Master and Doctor of Acupuncture and a Licensed Massage Therapist, and I bring the sanctuary to you. My mission is simple: maximize your body's highest potential for healing through natural health modalities, with care that treats the whole person.</p>
+      <p class="lede" style="margin-top:20px">I'm a Master of Acupuncture and Licensed Massage Therapist, and I bring the sanctuary to you. My mission is simple: maximize your body's highest potential for healing through natural health modalities, with care that treats the whole person.</p>
       <div class="mv">
         <details open>
           <summary>Mission</summary>
@@ -608,7 +611,7 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
           <button class="btn btn-gold" id="copy" type="button">Copy request</button>
           <span class="toast" id="toast" role="status"></span>
         </div>
-        <div style="margin-top:22px"><div class="mins" style="margin-bottom:8px">Call or text to book</div><div class="phone" id="phone">(516) 206-7722</div><div style="color:var(--faint);font-size:.82rem;margin-top:6px">Northport · Long Island, NY · Mobile service</div><div class="mins" style="margin-top:12px;color:var(--jade)">Now accepting cash &amp; credit cards</div></div>
+        <div style="margin-top:22px"><div class="mins" style="margin-bottom:8px">Call or text to book</div><div class="phone" id="phone">(516) 206-7722</div><div style="color:var(--faint);font-size:.82rem;margin-top:6px">Northport · Long Island, NY · Mobile service</div><div class="cards" style="margin-top:14px" role="img" aria-label="We accept Visa, Mastercard, American Express and Discover"><i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-amex"></i><i class="fa-brands fa-cc-discover"></i></div></div>
       </div>
     </div>
   </div>
@@ -621,7 +624,7 @@ footer .disc{font-size:.82rem;color:var(--faint);margin-top:16px;max-width:60ch}
       <p style="margin-top:18px;max-width:46ch">Mobile acupuncture, massage therapy and Traditional Chinese Medicine based in Northport, NY, serving Long Island. Seniors, children and geriatric communities welcome.</p>
       <p style="margin-top:14px;font:700 1.2rem/1.3 var(--display);color:var(--text);user-select:all">(516) 206-7722</p>
       <p style="color:var(--muted);font-size:.85rem">Northport, NY · Call for an appointment today</p>
-      <p style="color:var(--muted);font-size:.85rem">Now accepting cash &amp; credit cards</p>
+      <div class="cards" style="margin-top:12px" role="img" aria-label="We accept Visa, Mastercard, American Express and Discover"><i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-amex"></i><i class="fa-brands fa-cc-discover"></i></div>
       <p class="disc">Services complement, and do not replace, care from your physician. Results vary from person to person. Talk with your doctor about any medical condition, pregnancy or medication before starting treatment.</p>
       <p style="margin-top:16px;font-size:.82rem">© 2026 <span data-brand>The Eastern Glow</span></p>
     </div>
