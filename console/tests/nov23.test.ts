@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { assemble, refreshPass, looksIncomplete } from '../src/worker/snapshot';
 import { NotionReader } from '../src/worker/notion';
 import { briefNextDate, workingBriefs, mixBriefQueue, hoursFrom, bookedAhead } from '../src/shared/work';
-import { followUps, waitingOnKris } from '../src/shared/followups';
 import { statementMonth, syncMonthly } from '../src/shared/synctraj';
 import { artistProfiles } from '../src/worker/parsers';
 import { thisWeekMetric } from '../src/shared/derive';
@@ -117,24 +116,6 @@ describe('Mid-refresh guard', () => {
   });
 });
 
-describe('Follow-ups', () => {
-  it('one list, oldest first, with hot vibe artists and 14-day rebooks', () => {
-    const s = base();
-    s.cc = { cash: { calendar: [['NOW', 'Studio X — $100 owed', 'Work order Apr 27', 'CHASE', '#f00']] } };
-    s.syncContacts = [{ name: 'A', company: 'Lib A', type: 'Library', list: 'Scouted', status: 'Contacted', lastContacted: '2026-11-01', lastContactedText: '', followUp: '2026-11-15', followUpText: '', url: 'u1' },
-      { name: 'B', company: 'Durango Co', type: 'Supervisor', list: 'Durango contacts', status: 'Contacted', lastContacted: '2026-11-01', lastContactedText: '', followUp: '2026-11-10', followUpText: '', url: 'u2' }];
-    const f = followUps(s);
-    const groups = new Set(f.map((x) => x.group));
-    expect([...groups].sort()).toEqual(['brief', 'mix', 'owed', 'rebook', 'sync', 'vibe']);
-    expect(f.map((x) => x.age)).toEqual([...f.map((x) => x.age)].sort((a, b) => b - a));
-    expect(f.find((x) => x.who === 'Artist V')?.hot).toBe(true);
-    expect(f.find((x) => x.who === 'Artist O')?.hot).toBe(false);
-    expect(f.some((x) => x.who === 'Artist N')).toBe(false); // no-show
-    expect(f.some((x) => x.who === 'Artist L')).toBe(false); // booked
-    expect(f.some((x) => x.who === 'Artist Y' && x.group === 'rebook')).toBe(true);
-    expect(f.some((x) => /durango/i.test(x.who))).toBe(false);
-  });
-});
 
 describe('Sync trajectory', () => {
   it('places a BMI statement about 5 months after its quarter ends', () => {
@@ -160,27 +141,18 @@ describe('All artists', () => {
   });
 });
 
-describe('Scout replies waiting on Kris', () => {
-  it('skips rows marked handled, passed, pending on their side, or already answered by Kris', () => {
-    expect(waitingOnKris({ reply: 'asked lease price', nextAction: 'HANDLED — Kris responded and quoted' })).toBe(false);
-    expect(waitingOnKris({ reply: 'asked a question — ball with Kris.', nextAction: 'Kris PASSED on the fit' })).toBe(false);
-    expect(waitingOnKris({ reply: 'agreed (pending)', nextAction: 'Pending on his side; do not re-contact' })).toBe(false);
-    expect(waitingOnKris({ reply: "Replied on Threads; Kris-approved follow-up email sent Oct 28", nextAction: 'Kris handles from here' })).toBe(false);
-    expect(waitingOnKris({ reply: 'Asked for the price list', nextAction: '' })).toBe(true);
-  });
-});
 
 describe('Prompt for Maestro', async () => {
   const { maestroPrompt } = await import('../src/shared/maestro');
-  it('never names a template or playlist, tailors only to the stated ask, keeps the tracker rules', () => {
+  it('never names a template or playlist, tailors only to the stated ask, keeps the holds short', () => {
     const p = maestroPrompt({ name: 'Lib X', company: 'Label Y', type: 'Library', email: 'x@y.test', how: 'Streaming link only, no files.', row: 'https://app.notion.com/p/abc' }, 'Mon Nov 23 – Sun Nov 29');
     expect(p).not.toMatch(/template|playlist/i);
     expect(p).toContain('your usual system');
     expect(p).toContain('- Streaming link only, no files.');
     expect(p).toContain('x@y.test');
     expect(p).toContain('https://app.notion.com/p/abc');
-    expect(p).toMatch(/Durango hold/);
-    expect(p).toMatch(/Draft ready/);
+    expect(p).toContain("Same rules as always. Skip anyone on the Durango hold, and anyone you've been told not to contact or to hold off on.");
+    expect(p).not.toMatch(/Draft ready|Gmail draft|Last contacted/);
     expect(maestroPrompt({ name: 'S', company: '', type: 'Supervisor', email: 's@t.test', how: '', row: '' })).toContain('send it the way you normally would');
   });
 });

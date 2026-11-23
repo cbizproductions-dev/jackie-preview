@@ -93,6 +93,11 @@ Running log so another Claude session can pick up. Newest first within each sect
 - **New sources:** Shared Sync Contacts (database, all rows; "Last contacted" / "Follow-up" are text, parsed as loose dates) and the three scout trackers (found by title, Status = Replied only, every 6 h). A replied lead counts as waiting on Kris only if its row doesn't say handled / passed / pending on their side and Kris hasn't already answered.
 - **Navigation:** phone bar Home · Money · Studio · Sync · Calendar · More; "Follow-ups" (owed mixes, money owed, rebook candidates, vibe artists not paid with "hot" inside 14 days, sync contacts past Follow-up with no reply (Durango on hold), scout replies waiting on Kris, briefs due in 7 days) in More.
 
+## Nov 23, later (Kris)
+- Phone bar: Home · Calendar · Sync · Studio · Money · More (sidebar follows the same order).
+- Follow-ups screen removed at Kris's request; replaced in More by **Success**: "Your wins" (live from the Command Center: Wins in today's brief + verified turning points) and researched sections (lessons from his own numbers, words to work by, success stories, music business landscape, sync landscape, stay ahead of the curve). The researched content lives in KV `success:v1` (kept out of this public repo because it quotes his numbers); every outside fact links its source, forecasts and single surveys are labelled. Refreshed on request; no schedule.
+- Maestro prompt: no template or playlist named; holds kept to one line ("Durango hold, and anyone you've been told not to contact or to hold off on").
+
 ## Open questions / blocked
 1. Workers Free nominally allows 10 ms CPU per request; fresh requests use 23–52 ms. Not failing today, but if it starts to, Workers Paid ($5/mo) removes the risk. Not changed without Kris's OK.
 

@@ -57,11 +57,13 @@ function withHeaders(res: Response, extra: Record<string, string> = {}) {
 async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response> {
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...SECURITY_HEADERS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
   const cached = (await env.SNAP.get(KEYS.snapshot, 'json')) as any;
+  // Researched Success content lives in KV (not the public repo); one KV read, no Notion calls.
+  const success = (await env.SNAP.get('success:v1', 'json')) ?? undefined;
   if (!env.NOTION_TOKEN) {
     const seed = cached ?? (await env.SNAP.get(KEYS.seed, 'json'));
-    return seed ? json({ ...seed, servedFrom: 'saved', savedAt: seed.generatedAt }) : json({ error: 'No snapshot yet' }, 503);
+    return seed ? json({ ...seed, success, servedFrom: 'saved', savedAt: seed.generatedAt }) : json({ error: 'No snapshot yet' }, 503);
   }
-  if (!fresh && cached) return json({ ...cached, servedFrom: 'saved', savedAt: cached.generatedAt });
+  if (!fresh && cached) return json({ ...cached, success, servedFrom: 'saved', savedAt: cached.generatedAt });
 
   const t0 = Date.now();
   const reader = new NotionReader(env.NOTION_TOKEN);
@@ -94,11 +96,11 @@ async function getSnapshot(env: Env, url: URL, fresh: boolean): Promise<Response
     await env.SNAP.put(KEYS.snapshot, JSON.stringify(snap));
     // No key, token or URL in logs: just the shape of the refresh.
     console.log(JSON.stringify({ evt: 'refresh', mode, notionCalls: reader.calls, changed, pending, failed: snap.failed, appleMs, appleEvents: state.apple?.items.length ?? null, appleReused: state.apple?.reused ?? null, appleError: state.apple?.error ?? null, ms: Date.now() - t0 }));
-    return json({ ...snap, servedFrom: 'live', notionCalls: reader.calls });
+    return json({ ...snap, success, servedFrom: 'live', notionCalls: reader.calls });
   } catch (e) {
     const reason = explainError(String((e as Error).message ?? e));
     console.log(JSON.stringify({ evt: 'refresh_failed', notionCalls: reader.calls, reason, ms: Date.now() - t0 }));
-    if (cached) return json({ ...cached, servedFrom: 'saved', savedAt: cached.generatedAt, fallback: true, fallbackReason: reason });
+    if (cached) return json({ ...cached, success, servedFrom: 'saved', savedAt: cached.generatedAt, fallback: true, fallbackReason: reason });
     return json({ error: reason }, 503);
   }
 }

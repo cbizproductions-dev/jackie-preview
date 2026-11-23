@@ -257,6 +257,8 @@ export const Snapshot = z.object({
   /** Screen-print header art (traced from Kris's own photos), read from the runbook page. */
   art: z.record(z.object({ w: z.number(), h: z.number(), paths: z.string() })).default({}),
   cc: CommandCenterData,
+  /** Researched "Success" content (KV success:v1). */
+  success: z.record(z.any()).optional(),
   /** "Since last update": business changes found between fresh reads (see src/worker/changes.ts). */
   changes: z.object({
     baselineAt: z.string(),

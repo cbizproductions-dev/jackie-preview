@@ -1,7 +1,7 @@
 /**
  * Copy-and-paste prompt for Maestro, one per "This week's 5" pick (Kris, Nov 23).
- * Maestro already knows which template and playlist to use (Kris: don't tell him). The prompt only gives the contact,
- * what they ask for, and the Sync Tracker's existing rules. It adds no new process.
+ * Maestro already knows which template and playlist to use and how he works (Kris: don't tell him, don't over-describe).
+ * The prompt only gives the contact, what they ask for, and a short reminder of the holds.
  */
 export type Pick = { name: string; company: string; type: string; email: string; how: string; row: string };
 
@@ -17,7 +17,6 @@ export function maestroPrompt(p: Pick, weekLabel?: string): string {
     'Only tailor your usual outreach to what they ask for:',
     ask ? `- ${ask}` : '- Nothing special on file; send it the way you normally would.',
     '',
-    "Same rules as always (Sync Tracker): check the row and Gmail first that they haven't been contacted yet, and skip anyone on the Durango hold. Put it in a Gmail draft for Kris and set the row to Draft ready. Once it's sent, update Status, Last contacted and Follow-up on the row.",
-    "If something they ask for doesn't fit what we have (for example exclusive-only material or a format we don't have ready), tell Kris instead of guessing.",
+    "Same rules as always. Skip anyone on the Durango hold, and anyone you've been told not to contact or to hold off on.",
   ].join('\n');
 }

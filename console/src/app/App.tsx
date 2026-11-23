@@ -8,7 +8,7 @@ const Studio = lazy(() => import('./screens/Studio'));
 const Beats = lazy(() => import('./screens/Beats'));
 const Sync = lazy(() => import('./screens/Sync'));
 const Creative = lazy(() => import('./screens/Creative'));
-const Followups = lazy(() => import('./screens/Followups'));
+const Success = lazy(() => import('./screens/Success'));
 const Contracts = lazy(() => import('./screens/Contracts'));
 const Strategy = lazy(() => import('./screens/Strategy'));
 const Career = lazy(() => import('./screens/Career'));
@@ -19,22 +19,22 @@ const System = lazy(() => import('./screens/System'));
 
 export const SCREENS = [
   { id: 'home', name: 'Home', C: Home },
-  { id: 'money', name: 'Money', C: Money },
-  { id: 'studio', name: 'Studio', C: Studio },
-  { id: 'sync', name: 'Sync', C: Sync },
   { id: 'calendar', name: 'Calendar', C: Calendar },
+  { id: 'sync', name: 'Sync', C: Sync },
+  { id: 'studio', name: 'Studio', C: Studio },
+  { id: 'money', name: 'Money', C: Money },
   { id: 'beats', name: 'Beats', C: Beats },
   { id: 'creative', name: 'Creative', C: Creative },
   { id: 'contracts', name: 'Contracts', C: Contracts },
   { id: 'strategy', name: 'Strategy', C: Strategy },
   { id: 'career', name: 'Career', C: Career },
   { id: 'speaking', name: 'Speaking', C: Speaking },
-  { id: 'followups', name: 'Follow-ups', C: Followups },
+  { id: 'success', name: 'Success', C: Success },
   { id: 'cabinet', name: 'Cabinet', C: Cabinet },
   { id: 'system', name: 'System', C: System },
 ] as const;
-// Phone bottom bar (Kris, Nov 23): Home · Money · Studio · Sync · Calendar · More. Everything else stays in More.
-const TABS = ['home', 'money', 'studio', 'sync', 'calendar'];
+// Phone bottom bar (Kris, Nov 23): Home · Calendar · Sync · Studio · Money · More. Everything else stays in More.
+const TABS = ['home', 'calendar', 'sync', 'studio', 'money'];
 
 const routeFromHash = () => {
   const id = location.hash.replace(/^#\/?/, '').split('?')[0];
