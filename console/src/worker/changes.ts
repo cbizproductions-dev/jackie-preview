@@ -7,7 +7,7 @@
  */
 import type { Snapshot } from '../shared/schema';
 import { isDurango } from '../shared/derive';
-import { weekCash } from '../shared/rules';
+import { weekCash, mixQueue, isOverdue } from '../shared/rules';
 import { addDays, weekStart, labelDay } from '../shared/time';
 const dd = (d: string | null | undefined) => (d ? labelDay(d, { month: 'short', day: 'numeric' }) : '');
 
@@ -27,7 +27,10 @@ export type ChangeEvent = {
 };
 type Facts = {
   briefs?: Record<string, { s: string; t: string; c: string; d: string | null }>;
-  mixes?: Record<string, { due: string | null; n: number; od: boolean }>;
+  /** One entry per Studio Board mix row (client|due), so two rows for the same client never overwrite each other. */
+  mixes?: Record<string, { client: string; due: string | null; n: number; od: boolean }>;
+  /** The Mix queue meter's own overdue count. */
+  overdueMixes?: number;
   syncChecks?: string[];
   deliveries?: string[];
   beatSales?: string[];
@@ -41,7 +44,9 @@ type Facts = {
   lights?: Record<string, string>;
 };
 export type ChangeState = { v?: number; facts: Facts; events: ChangeEvent[]; baselineAt: string };
-const VERSION = 2;
+const VERSION = 3;
+/** The false "No overdue mixes" posted Nov 23 by the v2 detector (rows keyed by client name). */
+const FALSE_EVENTS = new Set(['overdue-clear:2026-11-23']);
 
 const KEEP_DAYS = 30;
 const MAX_EVENTS = 60;
@@ -63,7 +68,9 @@ export function factsOf(s: Snapshot): Facts {
   const f: Facts = {};
   if (ok('briefs') && s.briefs.length) f.briefs = Object.fromEntries(s.briefs.filter((b) => b.url).map((b) => [b.url, { s: b.status ?? '', t: b.brief, c: b.company ?? '', d: b.due ?? null }]));
   if (ok('studio')) {
-    f.mixes = Object.fromEntries(s.studio.mixes.map((m) => [m.client, { due: m.due, n: m.count, od: !!m.due && m.due < s.today }]));
+    // Same overdue rule as the Mix queue meter (approximate counts included).
+    f.mixes = Object.fromEntries(s.studio.mixes.map((m) => [`${m.client}|${m.due ?? ''}`, { client: m.client, due: m.due, n: m.count, od: isOverdue(m.due, s.today) }]));
+    f.overdueMixes = mixQueue(s.studio.mixes, s.today).overdue;
     f.syncChecks = s.studio.syncChecks.map((c) => `${c.company}|${c.date ?? ''}|${c.amount}`);
     f.deliveries = (s.studio.deliveries ?? []).map((d) => `${d.client}|${d.date}`);
     f.beatSales = s.studio.beatSales.map((b) => `${b.buyer}|${b.date}|${b.amount}`);
@@ -162,15 +169,15 @@ export function diff(prev: Facts, cur: Facts, s: Snapshot, nowIso: string): Chan
     add({ key: `deliv:${k}`, recordDate: date, kind: 'delivered', title: `Mix delivered: ${client}`, detail: 'Delivery recorded on the Studio Board.', priority: 72, tone: 'ok', source: 'Studio Board', url: ROOM.studio });
   }
   if (prev.mixes && cur.mixes) {
-    for (const [client, m] of Object.entries(cur.mixes)) {
-      const was = prev.mixes[client];
-      if (m.od && !(was && was.od && was.due === m.due))
-        add({ key: `overdue:${client}:${m.due}`, recordDate: m.due, kind: 'overdue', title: `Mix now overdue: ${client}`, detail: `${m.n} owed, was due ${dd(m.due) || 'n/a'}.`, priority: 86, tone: 'bad', source: 'Studio Board', url: ROOM.studio });
+    for (const [key, m] of Object.entries(cur.mixes)) {
+      const was = prev.mixes[key];
+      if (m.od && !(was && was.od))
+        add({ key: `overdue:${key}`, recordDate: m.due, kind: 'overdue', title: `Mix now overdue: ${m.client}`, detail: `${m.n} owed, was due ${dd(m.due) || 'n/a'}.`, priority: 86, tone: 'bad', source: 'Studio Board', url: ROOM.studio });
     }
-    const before = Object.values(prev.mixes).filter((m) => m.od).length;
-    const after = Object.values(cur.mixes).filter((m) => m.od).length;
-    if (before > 0 && after === 0) add({ key: `overdue-clear:${today}`, recordDate: null, kind: 'resolved', title: 'No overdue mixes', detail: `Overdue clients went from ${before} to 0.`, priority: 84, tone: 'ok', source: 'Studio Board', url: ROOM.studio });
   }
+  // "No overdue mixes" only when the Mix queue meter's own overdue count reaches 0.
+  if (prev.overdueMixes != null && cur.overdueMixes != null && prev.overdueMixes > 0 && cur.overdueMixes === 0)
+    add({ key: `overdue-clear:${today}`, recordDate: null, kind: 'resolved', title: 'No overdue mixes', detail: `Overdue mixes went from ${prev.overdueMixes} to 0.`, priority: 84, tone: 'ok', source: 'Studio Board', url: ROOM.studio });
   // Goals reached.
   for (const g of cur.goals ?? []) if (prev.goals && !prev.goals.includes(g)) {
     const row = s.goals.find((x) => x.goal === g);
@@ -208,6 +215,8 @@ function datedRecords(s: Snapshot, nowIso: string): ChangeEvent[] {
 export function updateChanges(prev: ChangeState | undefined, s: Snapshot, now: Date): ChangeState {
   const nowIso = now.toISOString();
   const cur = factsOf(s);
+  // v2 → v3: drop the false event and re-baseline mixes with the corrected rule, keeping all other history.
+  if (prev?.v === 2) prev = { ...prev, v: VERSION, events: prev.events.filter((e) => !FALSE_EVENTS.has(e.key)), facts: { ...prev.facts, mixes: cur.mixes, overdueMixes: cur.overdueMixes } };
   if (!prev || prev.v !== VERSION) return { v: VERSION, facts: cur, events: datedRecords(s, nowIso), baselineAt: prev?.baselineAt ?? nowIso };
   // Keep the last known facts for any category that couldn't be read this time.
   const facts: Facts = { ...prev.facts, ...Object.fromEntries(Object.entries(cur).filter(([, v]) => v !== undefined)) };

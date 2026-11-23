@@ -103,4 +103,48 @@ describe('Since last update', () => {
     const b = updateChanges(a, s2, new Date('2026-11-22T16:00:00Z'));
     expect(b.events.some((e) => /durango/i.test(e.title))).toBe(false);
   });
+  it('two rows for the same client: the overdue one still counts (matches the Mix queue meter)', async () => {
+    const { mixQueue } = await import('../src/shared/rules');
+    const mk = (today: string) => {
+      const s = base(`${today}T15:00:00Z`);
+      s.studio.mixes = [
+        { client: 'Artist S', due: '2026-11-10', count: 2, countApprox: true, note: '' },
+        { client: 'Artist L', due: '2026-11-20', count: 1, countApprox: false, note: '' },
+        { client: 'Artist S', due: '2026-11-24', count: 3, countApprox: false, note: '' },
+      ];
+      return s;
+    };
+    const a = updateChanges(undefined, mk('2026-11-22'), new Date('2026-11-22T20:00:00Z'));
+    expect(a.facts.overdueMixes).toBe(mixQueue(mk('2026-11-22').studio.mixes, '2026-11-22').overdue);
+    expect(a.facts.overdueMixes).toBe(3);
+    // Artist L delivered: one overdue row remains, so no "No overdue mixes".
+    const s2 = mk('2026-11-23');
+    s2.studio.mixes = s2.studio.mixes.filter((m: any) => m.client !== 'Artist L');
+    const b = updateChanges(a, s2, new Date('2026-11-23T10:56:00Z'));
+    expect(b.events.some((e) => e.title === 'No overdue mixes')).toBe(false);
+    expect(b.facts.overdueMixes).toBe(2);
+    // All overdue delivered: now it fires.
+    const s3 = mk('2026-11-23');
+    s3.studio.mixes = s3.studio.mixes.filter((m: any) => m.due === '2026-11-24');
+    const c = updateChanges(b, s3, new Date('2026-11-23T12:00:00Z'));
+    expect(c.events.find((e) => e.title === 'No overdue mixes')?.detail).toBe('Overdue mixes went from 2 to 0.');
+  });
+  it('one-time cleanup removes the false Nov 23 event and re-baselines without a fake "now overdue"', () => {
+    const s = base('2026-11-23T15:00:00Z');
+    s.studio.mixes = [{ client: 'Artist S', due: '2026-11-10', count: 2, countApprox: true, note: '' }, { client: 'Artist S', due: '2026-11-24', count: 3, countApprox: false, note: '' }];
+    const oldState: any = {
+      v: 2, baselineAt: '2026-11-22T20:55:00Z',
+      facts: { mixes: { 'Artist S': { due: '2026-11-24', n: 3, od: false } } },
+      events: [
+        { key: 'overdue-clear:2026-11-23', seenAt: '2026-11-23T10:56:35Z', recordDate: null, kind: 'resolved', title: 'No overdue mixes', detail: '', priority: 84, tone: 'ok', source: 'Studio Board', url: '' },
+        { key: 'deliv:Artist L|2026-11-22', seenAt: '2026-11-23T10:56:35Z', recordDate: '2026-11-22', kind: 'delivered', title: 'Mix delivered: Artist L', detail: '', priority: 72, tone: 'ok', source: 'Studio Board', url: '' },
+      ],
+    };
+    const c = updateChanges(oldState, s, new Date('2026-11-23T15:00:00Z'));
+    expect(c.events.map((e) => e.key)).not.toContain('overdue-clear:2026-11-23');
+    expect(c.events.map((e) => e.key)).toContain('deliv:Artist L|2026-11-22');
+    expect(c.events.some((e) => e.kind === 'overdue')).toBe(false);
+    expect(c.facts.overdueMixes).toBe(2);
+    expect(c.baselineAt).toBe('2026-11-22T20:55:00Z');
+  });
 });
